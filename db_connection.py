@@ -14,7 +14,7 @@ class DbConnection:
             print(e)
 
     def get_db_lists(self):
-        query = 'SELECT LIST_ID FROM LISTS ORDER BY LIST_POS'
+        query = 'SELECT LIST_ID FROM LISTS ORDER BY LIST_POS DESC'
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
