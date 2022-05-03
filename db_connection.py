@@ -230,7 +230,7 @@ class DbConnection:
         self.connection.commit()
 
     def cfd_priority_definition(self):
-        query = 'UPDATE CFD_PRIORITY_ORDER SET PRIORITY_ORDER = ?, PRIORITY_LIST_NAME = ? || " - " || LIST_NAME ' \
+        query = 'UPDATE CFD_PRIORITY_ORDER SET PRIORITY_ORDER = ?, PRIORITY_LIST_NAME = ? || "- " || LIST_NAME ' \
                 'FROM ' \
                 'LISTS ' \
                 'WHERE LIST_ID = PRIORITY_ID_LIST AND PRIORITY_ID_LIST = ?'
