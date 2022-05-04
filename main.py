@@ -11,7 +11,7 @@ def main():
 
     db_connection = DbConnection('TRELLO_TECHSALLUS.db')
 
-    db_connection.insert_list(trello_connection)
+    db_connection.insert_lists(trello_connection)
     db_connection.update_lists(trello_connection)
 
     db_connection.insert_cards(trello_connection)
@@ -22,6 +22,10 @@ def main():
     db_connection.insert_cfd()
     db_connection.insert_cfd_priority_order()
     db_connection.cfd_priority_definition()
+
+    db_connection.insert_labels(trello_connection)
+    db_connection.update_labels(trello_connection)
+    db_connection.delete_labels(trello_connection)
 
 
 if __name__ == '__main__':

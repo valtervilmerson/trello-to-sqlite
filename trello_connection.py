@@ -1,7 +1,7 @@
 from trello import TrelloApi
 
 
-class TrelloConnection:
+class TrelloConnection(TrelloApi):
 
     def __init__(self):
         self.trello_connection = None
@@ -34,3 +34,7 @@ class TrelloConnection:
     def get_trello_board_actions(self):
         trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard')
         return trello_actions
+
+    def get_trello_labels(self):
+        trello_labels = self.trello_connection.boards.get_label(self.board)
+        return trello_labels

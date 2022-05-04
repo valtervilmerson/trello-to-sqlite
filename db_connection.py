@@ -24,6 +24,17 @@ class DbConnection:
             print(e)
             return e
 
+    def get_db_labels_ids(self):
+        query = 'SELECT LABEL_ID FROM LABELS'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query)
+            db_labels = cursor.fetchall()
+            return db_labels
+        except Error as e:
+            print(e)
+            return e
+
     def get_db_cards_ids(self):
         query = 'SELECT CARD_ID FROM CARDS'
         cursor = self.connection.cursor()
@@ -46,7 +57,7 @@ class DbConnection:
             print(e)
             return e
 
-    def insert_list(self, trello_connection):
+    def insert_lists(self, trello_connection):
 
         sanitized_db_lists_ids = []
         exclusive_lists = []
@@ -190,6 +201,54 @@ class DbConnection:
             print(e)
             return e
 
+    def insert_labels(self, trello_connection):
+        sanitized_db_labels_ids = []
+        exclusive_labels = []
+        inserted_rows = []
+
+        trello_labels = trello_connection.get_trello_labels()
+        db_cards_ids = self.get_db_labels_ids()
+
+        for item in db_cards_ids:
+            sanitized_db_labels_ids.append(item[0])
+
+        for data_id in trello_labels:
+            if data_id['id'] not in sanitized_db_labels_ids:
+                exclusive_labels.append(data_id)
+
+        cursor = self.connection.cursor()
+
+        for data in exclusive_labels:
+            insert_data = (data['id'], data['idBoard'], data['name'], data['color'])
+            query = 'INSERT INTO LABELS (LABEL_ID, LABEL_ID_BOARD, LABEL_NAME, LABEL_COLOR)' \
+                    'VALUES (?, ?, ?, ?)'
+            try:
+                cursor.execute(query, insert_data)
+                self.connection.commit()
+                inserted_rows.append(cursor.lastrowid)
+            except Error as e:
+                print(e)
+                return e
+        return inserted_rows
+
+    def update_labels(self, trello_connection):
+
+        trello_labels_update = trello_connection.get_trello_labels()
+
+        update_cursor = self.connection.cursor()
+        current_time = datetime.datetime.now()
+
+        for data in trello_labels_update:
+            update_data = (data['idBoard'], data['name'], data['color'], current_time, data['id'])
+            query = 'UPDATE LABELS SET LABEL_ID_BOARD = ? ,LABEL_NAME = ?, LABEL_COLOR = ?, ' \
+                    'LABEL_LAST_MODIFIED = ? WHERE LABEL_ID = ?'
+            try:
+                update_cursor.execute(query, update_data)
+            except Error as e:
+                print(e)
+                return e
+        self.connection.commit()
+
     def update_lists(self, trello_connection):
 
         trello_lists_update = trello_connection.get_trello_lists()
@@ -245,6 +304,35 @@ class DbConnection:
                 print(e)
                 return e
             counter = counter + 1
+        self.connection.commit()
+
+    def delete_labels(self, trello_connection):
+        sanitized_db_labels_ids = []
+        exclusive_labels = []
+        inserted_rows = []
+
+        db_labels_ids = self.get_db_labels_ids()
+        trello_labels = trello_connection.get_trello_labels()
+
+        sanitized_db_labels_ids = [x[0] for x in db_labels_ids]
+
+        trello_labels_ids = [x['id'] for x in trello_labels]
+
+        for data_id in sanitized_db_labels_ids:
+            if data_id not in trello_labels_ids:
+                exclusive_labels.append(data_id)
+
+        print(exclusive_labels)
+
+        cursor = self.connection.cursor()
+
+        for data in exclusive_labels:
+            query = 'DELETE LABELS WHERE LABEL_ID = ?'
+            try:
+                cursor.execute(query, data)
+            except Error as e:
+                print(e)
+                return e
         self.connection.commit()
 
     def close(self):
