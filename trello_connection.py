@@ -1,7 +1,7 @@
 from trello import TrelloApi
 
 
-class TrelloConnection(TrelloApi):
+class TrelloConnection():
 
     def __init__(self):
         self.trello_connection = None
