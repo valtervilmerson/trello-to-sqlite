@@ -307,9 +307,7 @@ class DbConnection:
         self.connection.commit()
 
     def delete_labels(self, trello_connection):
-        sanitized_db_labels_ids = []
         exclusive_labels = []
-        inserted_rows = []
 
         db_labels_ids = self.get_db_labels_ids()
         trello_labels = trello_connection.get_trello_labels()
@@ -321,8 +319,6 @@ class DbConnection:
         for data_id in sanitized_db_labels_ids:
             if data_id not in trello_labels_ids:
                 exclusive_labels.append(data_id)
-
-        print(exclusive_labels)
 
         cursor = self.connection.cursor()
 
