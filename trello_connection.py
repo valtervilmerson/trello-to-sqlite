@@ -1,27 +1,18 @@
 from trello import TrelloApi
 
 
-class TrelloConnection:
+class TrelloConnection(TrelloApi):
 
-    def __init__(self):
-        self.trello_connection = None
-        self.api_key = None
-        self.api_key = None
+    def __init__(self, api_key: str):
+        self.trello_connection = TrelloApi(api_key)
         self.api_token = None
         self.board = None
 
-    def set_key(self, key):
-        self.api_key = key
-
-    def set_token(self, token):
-        self.api_token = token
+    def set_api_token(self, api_token):
+        self.trello_connection.set_token(api_token)
 
     def set_board(self, board_id):
         self.board = board_id
-
-    def connect(self):
-        self.trello_connection = TrelloApi(self.api_key)
-        self.trello_connection.set_token(self.api_token)
 
     def get_trello_lists(self):
         trello_lists = self.trello_connection.boards.get_list(self.board)
@@ -40,5 +31,5 @@ class TrelloConnection:
         return trello_labels
 
     def get_cards_actions(self):
-        trello_card_actions = self.trello_connection.cards.get_action('62388f4cc42ec1865a9ef4fe', before='2022-05-06T18:53:12.401Z')
+        trello_card_actions = self.trello_connection.cards.get_action('62388f4cc42ec1865a9ef4fe')
         return trello_card_actions
