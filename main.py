@@ -26,6 +26,7 @@ def main():
     db_connection.insert_labels(trello_connection)
     db_connection.update_labels(trello_connection)
     db_connection.delete_labels(trello_connection)
+    # db_connection.insert_cards_labels(trello_connection)
 
 
 if __name__ == '__main__':

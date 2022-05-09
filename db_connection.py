@@ -1,6 +1,6 @@
 import sqlite3
-from sqlite3 import Error
 import datetime
+from sqlite3 import Error
 
 
 class DbConnection:
@@ -22,7 +22,7 @@ class DbConnection:
             return db_lists
         except Error as e:
             print(e)
-            return e
+            return 0
 
     def get_db_labels_ids(self):
         query = 'SELECT LABEL_ID FROM LABELS'
@@ -33,7 +33,7 @@ class DbConnection:
             return db_labels
         except Error as e:
             print(e)
-            return e
+            return 0
 
     def get_db_cards_ids(self):
         query = 'SELECT CARD_ID FROM CARDS'
@@ -44,7 +44,7 @@ class DbConnection:
             return db_cards
         except Error as e:
             print(e)
-            return e
+            return 0
 
     def get_db_board_actions_ids(self):
         query = 'SELECT ACTION_ID FROM ACTIONS'
@@ -55,23 +55,16 @@ class DbConnection:
             return db_actions
         except Error as e:
             print(e)
-            return e
+            return 0
 
     def insert_lists(self, trello_connection):
-
-        sanitized_db_lists_ids = []
-        exclusive_lists = []
         inserted_rows = []
 
         trello_lists = trello_connection.get_trello_lists()
         db_lists_ids = self.get_db_lists()
 
-        for item in db_lists_ids:
-            sanitized_db_lists_ids.append(item[0])
-
-        for data_id in trello_lists:
-            if data_id['id'] not in sanitized_db_lists_ids:
-                exclusive_lists.append(data_id)
+        sanitized_db_lists_ids = [x[0] for x in db_lists_ids]
+        exclusive_lists = [x for x in trello_lists if x['id'] not in sanitized_db_lists_ids]
 
         cursor = self.connection.cursor()
 
@@ -89,19 +82,13 @@ class DbConnection:
         return inserted_rows
 
     def insert_cards(self, trello_connection):
-        sanitized_db_cards_ids = []
-        exclusive_cards = []
         inserted_rows = []
 
         trello_cards = trello_connection.get_trello_cards()
         db_cards_ids = self.get_db_cards_ids()
 
-        for item in db_cards_ids:
-            sanitized_db_cards_ids.append(item[0])
-
-        for data_id in trello_cards:
-            if data_id['id'] not in sanitized_db_cards_ids:
-                exclusive_cards.append(data_id)
+        sanitized_db_cards_ids = [x[0] for x in db_cards_ids]
+        exclusive_cards = [x for x in trello_cards if x['id'] not in sanitized_db_cards_ids]
 
         cursor = self.connection.cursor()
 
@@ -122,20 +109,13 @@ class DbConnection:
         return inserted_rows
 
     def insert_actions(self, trello_connection):
-
-        sanitized_db_actions_ids = []
-        exclusive_actions = []
         inserted_rows = []
 
         trello_actions = trello_connection.get_trello_board_actions()
         db_actions_ids = self.get_db_board_actions_ids()
 
-        for item in db_actions_ids:
-            sanitized_db_actions_ids.append(item[0])
-
-        for data_id in trello_actions:
-            if data_id['id'] not in sanitized_db_actions_ids:
-                exclusive_actions.append(data_id)
+        sanitized_db_actions_ids = [x[0] for x in db_actions_ids]
+        exclusive_actions = [x for x in trello_actions if x['id'] not in sanitized_db_actions_ids]
 
         cursor = self.connection.cursor()
         for data in exclusive_actions:
@@ -202,19 +182,13 @@ class DbConnection:
             return e
 
     def insert_labels(self, trello_connection):
-        sanitized_db_labels_ids = []
-        exclusive_labels = []
         inserted_rows = []
 
         trello_labels = trello_connection.get_trello_labels()
         db_cards_ids = self.get_db_labels_ids()
 
-        for item in db_cards_ids:
-            sanitized_db_labels_ids.append(item[0])
-
-        for data_id in trello_labels:
-            if data_id['id'] not in sanitized_db_labels_ids:
-                exclusive_labels.append(data_id)
+        sanitized_db_labels_ids = [x[0] for x in db_cards_ids]
+        exclusive_labels = [x for x in trello_labels if x['id'] not in sanitized_db_labels_ids]
 
         cursor = self.connection.cursor()
 
@@ -307,29 +281,51 @@ class DbConnection:
         self.connection.commit()
 
     def delete_labels(self, trello_connection):
-        exclusive_labels = []
 
         db_labels_ids = self.get_db_labels_ids()
         trello_labels = trello_connection.get_trello_labels()
 
         sanitized_db_labels_ids = [x[0] for x in db_labels_ids]
-
         trello_labels_ids = [x['id'] for x in trello_labels]
-
-        for data_id in sanitized_db_labels_ids:
-            if data_id not in trello_labels_ids:
-                exclusive_labels.append(data_id)
+        exclusive_labels = [x for x in sanitized_db_labels_ids if x not in trello_labels_ids]
 
         cursor = self.connection.cursor()
 
         for data in exclusive_labels:
-            query = 'DELETE LABELS WHERE LABEL_ID = ?'
+            query = "DELETE FROM LABELS WHERE LABEL_ID = '" + data + "'"
             try:
-                cursor.execute(query, data)
+                cursor.execute(query)
             except Error as e:
                 print(e)
                 return e
         self.connection.commit()
+
+    def insert_cards_labels(self, trello_connection):
+
+        inserted_rows = []
+        labels = []
+
+        trello_cards = trello_connection.get_trello_cards()
+
+        for card in trello_cards:
+            if len(card['idLabels']) > 0:
+                for label_id in card['idLabels']:
+                    labels.append((card['id'], label_id))
+
+        cursor = self.connection.cursor()
+
+        for data in labels:
+            insert_data = (data[0], data[1])
+            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID)' \
+                    'VALUES (?, ?)'
+            try:
+                cursor.execute(query, insert_data)
+                self.connection.commit()
+                inserted_rows.append(cursor.lastrowid)
+            except Error as e:
+                print(e)
+                return e
+        return inserted_rows
 
     def close(self):
         self.connection.close()
