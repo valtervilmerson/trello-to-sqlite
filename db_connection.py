@@ -13,6 +13,17 @@ class DbConnection:
         except Error as e:
             print(e)
 
+    def get_db_cards_labels(self):
+        query = 'SELECT CL_CARD_ID, CL_LABEL_ID FROM CARDS_LABELS'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query)
+            db_response = cursor.fetchall()
+            return db_response
+        except Error as e:
+            print(e)
+            return 0
+
     def get_db_lists(self):
         query = 'SELECT LIST_ID FROM LISTS ORDER BY LIST_POS DESC'
         cursor = self.connection.cursor()
@@ -307,6 +318,8 @@ class DbConnection:
 
         trello_cards = trello_connection.get_trello_cards()
 
+        db_cards_labels = self.get_db_cards_labels()
+
         for card in trello_cards:
             if len(card['idLabels']) > 0:
                 for label_id in card['idLabels']:
@@ -315,16 +328,17 @@ class DbConnection:
         cursor = self.connection.cursor()
 
         for data in labels:
-            insert_data = (data[0], data[1])
             query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID)' \
                     'VALUES (?, ?)'
-            try:
-                cursor.execute(query, insert_data)
-                self.connection.commit()
-                inserted_rows.append(cursor.lastrowid)
-            except Error as e:
-                print(e)
-                return e
+            insert_data = (data[0], data[1])
+            if insert_data not in db_cards_labels:
+                try:
+                    cursor.execute(query, insert_data)
+                    self.connection.commit()
+                    inserted_rows.append(cursor.lastrowid)
+                except Error as e:
+                    print(e)
+                    return e
         return inserted_rows
 
     def close(self):
