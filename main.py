@@ -1,6 +1,8 @@
+import json
+
 from trello_connection import TrelloConnection
 from db_connection import DbConnection
-from tqdm import tqdm
+from create_json import WriteJson
 
 
 def main():
@@ -27,6 +29,10 @@ def main():
     db_connection.delete_labels(trello_connection)
 
     db_connection.insert_cards_labels(trello_connection)
+
+    # actions = trello_connection.get_members_actions()
+    # print(actions)
+    # WriteJson.write("teste", actions)
 
 
 if __name__ == '__main__':

@@ -8,10 +8,10 @@ class TrelloConnection(TrelloApi):
         self.api_token = None
         self.board = None
 
-    def set_api_token(self, api_token):
+    def set_api_token(self, api_token: str):
         self.trello_connection.set_token(api_token)
 
-    def set_board(self, board_id):
+    def set_board(self, board_id: str):
         self.board = board_id
 
     def get_trello_lists(self):
@@ -33,3 +33,7 @@ class TrelloConnection(TrelloApi):
     def get_cards_actions(self):
         trello_card_actions = self.trello_connection.cards.get_action('62388f4cc42ec1865a9ef4fe')
         return trello_card_actions
+
+    def get_members_actions(self):
+        trello_members_actions = self.trello_connection.members.get_action('5d277e86ce62ae7ecc7a13c1')
+        return trello_members_actions

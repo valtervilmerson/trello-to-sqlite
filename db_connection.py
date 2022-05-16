@@ -216,6 +216,36 @@ class DbConnection:
                 return e
         return inserted_rows
 
+    def insert_cards_labels(self, trello_connection):
+
+        inserted_rows = []
+        labels = []
+
+        trello_cards = trello_connection.get_trello_cards()
+
+        db_cards_labels = self.get_db_cards_labels()
+
+        for card in trello_cards:
+            if len(card['idLabels']) > 0:
+                for label_id in card['idLabels']:
+                    labels.append((card['id'], label_id))
+
+        cursor = self.connection.cursor()
+
+        for data in labels:
+            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID)' \
+                    'VALUES (?, ?)'
+            insert_data = (data[0], data[1])
+            if insert_data not in db_cards_labels:
+                try:
+                    cursor.execute(query, insert_data)
+                    self.connection.commit()
+                    inserted_rows.append(cursor.lastrowid)
+                except Error as e:
+                    print(e)
+                    return e
+        return inserted_rows
+
     def update_labels(self, trello_connection):
 
         trello_labels_update = trello_connection.get_trello_labels()
@@ -311,35 +341,6 @@ class DbConnection:
                 return e
         self.connection.commit()
 
-    def insert_cards_labels(self, trello_connection):
-
-        inserted_rows = []
-        labels = []
-
-        trello_cards = trello_connection.get_trello_cards()
-
-        db_cards_labels = self.get_db_cards_labels()
-
-        for card in trello_cards:
-            if len(card['idLabels']) > 0:
-                for label_id in card['idLabels']:
-                    labels.append((card['id'], label_id))
-
-        cursor = self.connection.cursor()
-
-        for data in labels:
-            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID)' \
-                    'VALUES (?, ?)'
-            insert_data = (data[0], data[1])
-            if insert_data not in db_cards_labels:
-                try:
-                    cursor.execute(query, insert_data)
-                    self.connection.commit()
-                    inserted_rows.append(cursor.lastrowid)
-                except Error as e:
-                    print(e)
-                    return e
-        return inserted_rows
-
     def close(self):
         self.connection.close()
+
