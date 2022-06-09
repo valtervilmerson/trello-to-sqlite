@@ -2,6 +2,7 @@ import json
 
 from trello_connection import TrelloConnection
 from db_connection import DbConnection
+from datetime import datetime
 from create_json import WriteJson
 
 
@@ -37,4 +38,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    print('Completed')
+    print('Completed in ', datetime.now())
