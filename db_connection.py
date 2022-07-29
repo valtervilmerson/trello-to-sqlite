@@ -411,12 +411,24 @@ class DbConnection:
     def insert_board_state(self, trello_connection, execution_id):
 
         trello_cards = trello_connection.get_trello_cards()
-        cursor = self.connection.cursor()
+        trello_lists = trello_connection.get_trello_lists()
+        lists_pos = []
+        for list in trello_lists:
+            lists_pos.append([list['id'], list['pos']])
 
+        cursor = self.connection.cursor()
+        list_pos = 0
         for card in trello_cards:
-            board_state_data = (card['idBoard'], card['idList'], card['id'], self.execution_time, execution_id)
-            query = 'INSERT INTO BOARD_STATE (BS_BOARD_ID, BS_LIST_ID, BS_CARD_ID, BS_CREATE_DATE, BS_STATE_ID) ' \
-                    'VALUES (?, ?, ?, ?, ?)'
+            for pos in lists_pos:
+                if pos[0] == card['idList']:
+                    list_pos = pos[1]
+
+            query = 'INSERT INTO BOARD_STATE (BS_BOARD_ID, BS_LIST_ID, BS_CARD_ID, BS_CREATE_DATE, BS_STATE_ID, ' \
+                    'BS_CARD_POS, BS_LIST_POS) ' \
+                    'VALUES (?, ?, ?, ?, ?, ?, ?)'
+
+            board_state_data = (card['idBoard'], card['idList'], card['id'], self.execution_time, execution_id,
+                                card['pos'], list_pos)
 
             try:
                 cursor.execute(query, board_state_data)
