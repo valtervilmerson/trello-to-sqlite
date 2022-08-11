@@ -151,11 +151,12 @@ class DbConnection:
                         'VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
                 try:
                     cursor.execute(query, insert_data)
+                    self.connection.commit()
                     inserted_rows.append(cursor.lastrowid)
                 except Error as e:
                     print(e)
                     return e
-        self.connection.commit()
+
         return inserted_rows
 
     def insert_cfd(self):
@@ -304,10 +305,10 @@ class DbConnection:
                     'LIST_LAST_MODIFIED = ? WHERE LIST_ID = ?'
             try:
                 update_cursor.execute(query, update_data)
+                self.connection.commit()
             except Error as e:
                 print(e)
                 return e
-        self.connection.commit()
 
     def update_cards(self, trello_connection):
 
@@ -324,10 +325,10 @@ class DbConnection:
                     'CARD_DUE = ?, CARD_LAST_MODIFIED = ? WHERE CARD_ID = ?'
             try:
                 update_cursor.execute(query, update_data)
+                self.connection.commit()
             except Error as e:
                 print(e)
                 return e
-        self.connection.commit()
 
     def cfd_priority_definition(self):
         query = 'UPDATE CFD_PRIORITY_ORDER ' \
@@ -342,11 +343,11 @@ class DbConnection:
             update_data = (counter, counter, data[0])
             try:
                 cursor.execute(query, update_data)
+                self.connection.commit()
             except Error as e:
                 print(e)
                 return e
             counter = counter + 1
-        self.connection.commit()
 
     def delete_labels(self, trello_connection):
 
@@ -363,10 +364,10 @@ class DbConnection:
             query = "DELETE FROM LABELS WHERE LABEL_ID = '" + data + "'"
             try:
                 cursor.execute(query)
+                self.connection.commit()
             except Error as e:
                 print(e)
                 return e
-        self.connection.commit()
 
     def delete_lists(self, trello_connection):
 

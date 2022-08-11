@@ -7,7 +7,6 @@ from datetime import datetime
 
 def main(connection):
     db_connection = DbConnection('TRELLO_TECHSALLUS.db', datetime.now())
-    execution_id = 0
     execution_id = db_connection.execution_history()
 
     db_connection.insert_lists(connection)
