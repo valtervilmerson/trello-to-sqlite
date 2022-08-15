@@ -31,15 +31,18 @@ class TrelloConnection(TrelloApi):
         return trello_labels
 
     def get_cards_actions(self):
-        trello_card_actions = self.trello_connection.cards.get_action('62388f4cc42ec1865a9ef4fe')
+        card_id = '62388f4cc42ec1865a9ef4fe'
+        trello_card_actions = self.trello_connection.cards.get_action(card_id)
         return trello_card_actions
 
     def get_members_actions(self):
-        trello_members_actions = self.trello_connection.members.get_action('5d277e86ce62ae7ecc7a13c1')
+        id_member = '5d277e86ce62ae7ecc7a13c1'
+        trello_members_actions = self.trello_connection.members.get_action(id_member)
         return trello_members_actions
 
     def add_label_to_card(self, card_id: str):
-        add_label = self.trello_connection.cards.new_idLabel(card_id, '62c6cfabd2f01b44dbd0fe22')
+        label_id = '62c6cfabd2f01b44dbd0fe22'
+        add_label = self.trello_connection.cards.new_idLabel(card_id, label_id)
         return add_label
 
     def update_card_id_list(self, card_id: str, id_list: str):

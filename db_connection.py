@@ -4,10 +4,11 @@ from sqlite3 import Error
 
 class DbConnection:
 
-    def __init__(self, db_file, execution_time):
+    def __init__(self, db_file, trello_conn, execution_time):
         self.database = db_file
         self.connection = None
         self.execution_time = execution_time
+        self.trello_connection = trello_conn
         try:
             self.connection = sqlite3.connect(self.database)
         except Error as e:
@@ -80,10 +81,10 @@ class DbConnection:
             print(e)
             return 0
 
-    def insert_lists(self, trello_connection):
+    def insert_lists(self):
         inserted_rows = []
 
-        trello_lists = trello_connection.get_trello_lists()
+        trello_lists = self.trello_connection.get_trello_lists()
         db_lists_ids = self.get_db_lists()
 
         sanitized_db_lists_ids = [x[0] for x in db_lists_ids]
@@ -104,10 +105,10 @@ class DbConnection:
                 return e
         return inserted_rows
 
-    def insert_cards(self, trello_connection):
+    def insert_cards(self):
         inserted_rows = []
 
-        trello_cards = trello_connection.get_trello_cards()
+        trello_cards = self.trello_connection.get_trello_cards()
         db_cards_ids = self.get_db_cards_ids()
 
         sanitized_db_cards_ids = [x[0] for x in db_cards_ids]
@@ -131,10 +132,10 @@ class DbConnection:
                 return e
         return inserted_rows
 
-    def insert_actions(self, trello_connection):
+    def insert_actions(self):
         inserted_rows = []
 
-        trello_actions = trello_connection.get_trello_board_actions()
+        trello_actions = self.trello_connection.get_trello_board_actions()
         db_actions_ids = self.get_db_board_actions_ids()
 
         sanitized_db_actions_ids = [x[0] for x in db_actions_ids]
@@ -205,9 +206,9 @@ class DbConnection:
             print(e)
             return e
 
-    def delete_cfd_priority_order(self, trello_connection):
+    def delete_cfd_priority_order(self):
 
-        trello_lists = trello_connection.get_trello_lists()
+        trello_lists = self.trello_connection.get_trello_lists()
         cfd_lists = self.get_cfd_priority_list()
 
         trello_lists_ids = [x['id'] for x in trello_lists]
@@ -224,10 +225,10 @@ class DbConnection:
                 print(e)
                 return 0
 
-    def insert_labels(self, trello_connection):
+    def insert_labels(self):
         inserted_rows = []
 
-        trello_labels = trello_connection.get_trello_labels()
+        trello_labels = self.trello_connection.get_trello_labels()
         db_cards_ids = self.get_db_labels_ids()
 
         sanitized_db_labels_ids = [x[0] for x in db_cards_ids]
@@ -248,12 +249,12 @@ class DbConnection:
                 return e
         return inserted_rows
 
-    def insert_cards_labels(self, trello_connection, execution_id):
+    def insert_cards_labels(self, execution_id):
 
         inserted_rows = []
         labels = []
 
-        trello_cards = trello_connection.get_trello_cards()
+        trello_cards = self.trello_connection.get_trello_cards()
 
         for card in trello_cards:
             if len(card['idLabels']) > 0:
@@ -276,9 +277,9 @@ class DbConnection:
                 return e
         return inserted_rows
 
-    def update_labels(self, trello_connection):
+    def update_labels(self):
 
-        trello_labels_update = trello_connection.get_trello_labels()
+        trello_labels_update = self.trello_connection.get_trello_labels()
 
         update_cursor = self.connection.cursor()
 
@@ -293,9 +294,9 @@ class DbConnection:
                 return e
         self.connection.commit()
 
-    def update_lists(self, trello_connection):
+    def update_lists(self):
 
-        trello_lists_update = trello_connection.get_trello_lists()
+        trello_lists_update = self.trello_connection.get_trello_lists()
 
         update_cursor = self.connection.cursor()
 
@@ -310,9 +311,9 @@ class DbConnection:
                 print(e)
                 return e
 
-    def update_cards(self, trello_connection):
+    def update_cards(self):
 
-        trello_cards_update = trello_connection.get_trello_cards()
+        trello_cards_update = self.trello_connection.get_trello_cards()
 
         update_cursor = self.connection.cursor()
 
@@ -349,10 +350,10 @@ class DbConnection:
                 return e
             counter = counter + 1
 
-    def delete_labels(self, trello_connection):
+    def delete_labels(self):
 
         db_labels_ids = self.get_db_labels_ids()
-        trello_labels = trello_connection.get_trello_labels()
+        trello_labels = self.trello_connection.get_trello_labels()
 
         sanitized_db_labels_ids = [x[0] for x in db_labels_ids]
         trello_labels_ids = [x['id'] for x in trello_labels]
@@ -369,9 +370,9 @@ class DbConnection:
                 print(e)
                 return e
 
-    def delete_lists(self, trello_connection):
+    def delete_lists(self):
 
-        trello_lists = trello_connection.get_trello_lists()
+        trello_lists = self.trello_connection.get_trello_lists()
         db_lists = self.get_db_lists()
 
         sanitized_db_lists_ids = [x[0] for x in db_lists]
@@ -389,9 +390,9 @@ class DbConnection:
                 print(e)
                 return 0
 
-    def delete_cards(self, trello_connection):
+    def delete_cards(self):
 
-        trello_cards = trello_connection.get_trello_cards()
+        trello_cards = self.trello_connection.get_trello_cards()
         db_cards = self.get_db_cards_ids()
 
         sanitized_db_cards_ids = [x[0] for x in db_cards]
@@ -409,10 +410,10 @@ class DbConnection:
                 print(e)
                 return 0
 
-    def insert_board_state(self, trello_connection, execution_id):
+    def insert_board_state(self, execution_id):
 
-        trello_cards = trello_connection.get_trello_cards()
-        trello_lists = trello_connection.get_trello_lists()
+        trello_cards = self.trello_connection.get_trello_cards()
+        trello_lists = self.trello_connection.get_trello_lists()
         lists_pos = []
         for list in trello_lists:
             lists_pos.append([list['id'], list['pos']])
