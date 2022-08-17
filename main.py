@@ -42,7 +42,7 @@ if __name__ == '__main__':
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
-    db_connection = DbConnection('TRELLO_TECHSALLUS.db', trello_connection, datetime.now())
+    db_connection = DbConnection('TRELLO_TECHSALLUS.db', trello_connection)
 
     main(db_connection)
     # utilities.remove_cards_labels(trello_connection)

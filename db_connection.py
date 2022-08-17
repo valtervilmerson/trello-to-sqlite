@@ -1,13 +1,14 @@
 import sqlite3
 from sqlite3 import Error
+from datetime import datetime
 
 
 class DbConnection:
 
-    def __init__(self, db_file, trello_conn, execution_time):
+    def __init__(self, db_file, trello_conn):
         self.database = db_file
         self.connection = None
-        self.execution_time = execution_time
+        self.execution_time = datetime.now()
         self.trello_connection = trello_conn
         try:
             self.connection = sqlite3.connect(self.database)
