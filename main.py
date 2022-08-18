@@ -4,6 +4,7 @@ from trello_connection import TrelloConnection
 from db_connection import DbConnection
 from datetime import datetime
 import utilities
+import pandas
 
 
 def main(db_conn):
@@ -46,5 +47,7 @@ if __name__ == '__main__':
 
     main(db_connection)
     # utilities.remove_cards_labels(trello_connection)
+    # utilities.pandas(db_connection.connection)
+    # utilities.numpy()
 
     db_connection.close()

@@ -1,5 +1,7 @@
 from create_json import WriteJson
 from datetime import datetime
+import pandas as pd
+import numpy as np
 
 
 def update_cards_list(trello_connection):
@@ -38,3 +40,16 @@ def create_json(trello_connection):
     actions = trello_connection.get_members_actions()
     print(actions)
     WriteJson.write("teste", actions)
+
+
+def pandas(conn):
+    query = 'SELECT * FROM EXECUTION_HISTORY'
+    result = pd.read_sql_query(query, conn)
+    print(result)
+
+def numpy():
+    a = []
+    for e in 'Rafael Viado':
+        a.append(e)
+    r = np.diag(a)
+    print(r)
