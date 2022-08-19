@@ -5,9 +5,9 @@ import numpy as np
 
 
 def update_cards_list(trello_connection):
-    old_list = '62388db39989c82d991ce470'
+    old_list = '626a8cbda5616f41044c21da'
     label_id = '62695479d0676034bae7fdf8'
-    new_list = '62388db5b91b032488cea097'
+    new_list = '626a901794eb6b4b4202bda4'
 
     cards_certification = []
     cards = trello_connection.get_trello_cards()
@@ -21,6 +21,18 @@ def update_cards_list(trello_connection):
         trello_connection.update_card_id_list(card_id, new_list)
 
     print('Update_cards completed in ', datetime.now())
+
+
+def move_cards_list(trello_connection):
+    old_list = '626a8cbda5616f41044c21da'
+    new_list = '626a901794eb6b4b4202bda4'
+
+    cards = trello_connection.get_trello_cards()
+    for card in cards:
+        if card['idList'] == old_list:
+            trello_connection.update_card_id_list(card['id'], new_list)
+
+    print('Move_card_list completed in ', datetime.now())
 
 
 def remove_cards_labels(trello_conn):
