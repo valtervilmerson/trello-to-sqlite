@@ -55,9 +55,10 @@ def create_json(trello_connection):
 
 
 def pandas(conn):
-    query = 'SELECT * FROM EXECUTION_HISTORY'
+    query = 'SELECT LABEL_NAME, LABEL_ID FROM LABELS'
     result = pd.read_sql_query(query, conn)
     print(result)
+
 
 def numpy():
     a = []
@@ -65,3 +66,4 @@ def numpy():
         a.append(e)
     r = np.diag(a)
     print(r)
+
