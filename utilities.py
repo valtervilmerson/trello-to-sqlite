@@ -23,7 +23,7 @@ def update_cards_list(trello_connection):
     print('Update_cards completed in ', datetime.now())
 
 
-def move_cards_list(trello_connection):
+def move_cards_list(trello_connection, old_list: '', new_list: ''):
     old_list = '626a8cbda5616f41044c21da'
     new_list = '626a901794eb6b4b4202bda4'
 
