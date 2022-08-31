@@ -23,7 +23,7 @@ def update_cards_list(trello_connection):
     print('Update_cards completed in ', datetime.now())
 
 
-def move_cards_list(trello_connection, old_list: '', new_list: ''):
+def move_cards_list(trello_connection):
     old_list = '626a8cbda5616f41044c21da'
     new_list = '626a901794eb6b4b4202bda4'
 
@@ -35,17 +35,20 @@ def move_cards_list(trello_connection, old_list: '', new_list: ''):
     print('Move_card_list completed in ', datetime.now())
 
 
-def remove_cards_labels(trello_conn):
+def remove_cards_labels(trello_connection):
+
+    print('Remove_labels started at ', datetime.now())
 
     label_id = '626bbaf4ab76f467e0893a4e'
     id_list = '62388db5b91b032488cea097'
 
-    cards = trello_conn.get_trello_cards()
+    cards = trello_connection.get_cards_from_list(id_list)
+
     for card in cards:
         if card['idList'] == id_list:
-            trello_conn.delete_card_label(label_id, card['id'])
+            trello_connection.delete_card_label(label_id, card['id'])
 
-    print('Remove_labels completed in ', datetime.now())
+    print('Remove_labels completed at ', datetime.now())
 
 
 def create_json(trello_connection):
@@ -62,7 +65,7 @@ def pandas(conn):
 
 def numpy():
     a = []
-    for e in 'Rafael Viado':
+    for e in 'Teste':
         a.append(e)
     r = np.diag(a)
     print(r)

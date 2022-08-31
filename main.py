@@ -4,6 +4,7 @@ from trello_connection import TrelloConnection
 from db_connection import DbConnection
 from datetime import datetime
 import utilities
+from db_connection_mysql import MySQLConnection
 import pandas
 
 
@@ -46,10 +47,11 @@ if __name__ == '__main__':
     db_connection = DbConnection('TRELLO_TECHSALLUS.db', trello_connection)
 
     # main(db_connection)
-    utilities.remove_cards_labels(trello_connection, db_connection.connection)
-    # utilities.pandas(db_connection.connection)
-    # utilities.numpy()
-    # trello_connection.set_board(os.getenv('TRELLO_BOARD_SUPORTE'))
-    # utilities.move_cards_list(trello_connection)
+    mysql = MySQLConnection(trello_connection)
+    print(mysql.get_db_lists())
+    mysql.close()
+
+    if datetime.today().isoweekday() == 1:
+        utilities.remove_cards_labels(trello_connection)
 
     db_connection.close()

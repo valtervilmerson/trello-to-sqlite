@@ -40,6 +40,10 @@ class TrelloConnection(TrelloApi):
         trello_members_actions = self.trello_connection.members.get_action(id_member)
         return trello_members_actions
 
+    def get_cards_from_list(self, list_id: str):
+        cards = self.trello_connection.lists.get_card(list_id)
+        return cards
+
     def add_label_to_card(self, card_id: str):
         label_id = '62c6cfabd2f01b44dbd0fe22'
         add_label = self.trello_connection.cards.new_idLabel(card_id, label_id)
