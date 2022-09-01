@@ -11,7 +11,8 @@ import pandas
 def main(db_conn):
 
     print('Main Started in ', datetime.now())
-    execution_id = db_connection.execution_history()
+    execution_id = db_conn.execution_history()
+    print(execution_id)
 
     db_conn.insert_lists()
     db_conn.update_lists()
@@ -34,6 +35,8 @@ def main(db_conn):
     db_conn.insert_cards_labels(execution_id)
     db_conn.insert_board_state(execution_id)
 
+    db_conn.close()
+
     print('Main Completed in ', datetime.now())
 
 
@@ -44,14 +47,13 @@ if __name__ == '__main__':
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
-    db_connection = DbConnection('TRELLO_TECHSALLUS.db', trello_connection)
-
-    # main(db_connection)
+    sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
     mysql = MySQLConnection(trello_connection)
-    print(mysql.get_db_lists())
-    mysql.close()
+
+    main(sqlite)
+    main(mysql)
 
     if datetime.today().isoweekday() == 1:
         utilities.remove_cards_labels(trello_connection)
 
-    db_connection.close()
+
