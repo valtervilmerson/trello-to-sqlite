@@ -12,7 +12,6 @@ def main(db_conn):
 
     print('Main Started in ', datetime.now())
     execution_id = db_conn.execution_history()
-    print(execution_id)
 
     db_conn.insert_lists()
     db_conn.update_lists()
