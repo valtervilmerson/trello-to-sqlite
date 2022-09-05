@@ -70,3 +70,16 @@ def numpy():
     r = np.diag(a)
     print(r)
 
+
+def fix(trello_connection):
+    label_id = '62695479d0676034bae7fdf8'
+    id_list = '62388db5b91b032488cea097'
+
+    cards = trello_connection.get_cards_from_list(id_list)
+
+    for card in cards:
+        if label_id in card['idLabels']:
+            for label in card['idLabels']:
+                if label != label_id:
+                    trello_connection.delete_card_label(label, card['id'])
+
