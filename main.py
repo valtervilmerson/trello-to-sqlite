@@ -34,9 +34,15 @@ def main(db_conn):
     db_conn.insert_cards_labels(execution_id)
     db_conn.insert_board_state(execution_id)
 
-    db_conn.close()
-
     print('Main Completed in ', datetime.now())
+
+
+def remove_cards_labels():
+    execution_date = sqlite.get_last_execution_date()
+    date = datetime.strptime(execution_date, "%Y-%m-%d %H:%M:%S.%f").date()
+
+    if datetime.today().isoweekday() == 1 and not date.isoweekday() == 1:
+        utilities.remove_cards_labels(trello_connection)
 
 
 if __name__ == '__main__':
@@ -52,7 +58,7 @@ if __name__ == '__main__':
     main(sqlite)
     main(mysql)
 
-    if datetime.today().isoweekday() == 1:
-        utilities.remove_cards_labels(trello_connection)
+    remove_cards_labels()
 
-
+    sqlite.close()
+    mysql.close()

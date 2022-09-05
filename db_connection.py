@@ -453,5 +453,19 @@ class DbConnection:
             print(e)
             return 0
 
+    def get_last_execution_date(self):
+        query = 'SELECT MAX(EH_CREATE_DATE) FROM EXECUTION_HISTORY'
+        cursor = self.connection.cursor()
+
+        try:
+            response = cursor.execute(query)
+            response = response.fetchone()
+            return response[0]
+        except Error as e:
+            print(e)
+            return 0
+
+
     def close(self):
         self.connection.close()
+
