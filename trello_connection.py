@@ -30,9 +30,9 @@ class TrelloConnection(TrelloApi):
         trello_labels = self.trello_connection.boards.get_label(self.board)
         return trello_labels
 
-    def get_cards_actions(self):
-        card_id = '62388f4cc42ec1865a9ef4fe'
-        trello_card_actions = self.trello_connection.cards.get_action(card_id)
+    def get_cards_actions(self, card_id, param):
+        # card_id = '62388f4cc42ec1865a9ef4fe'
+        trello_card_actions = self.trello_connection.cards.get_action(card_id, filter=param)
         return trello_card_actions
 
     def get_members_actions(self):

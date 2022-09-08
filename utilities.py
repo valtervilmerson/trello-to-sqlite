@@ -83,3 +83,8 @@ def fix(trello_connection):
                 if label != label_id:
                     trello_connection.delete_card_label(label, card['id'])
 
+
+def iso_date_to_standard(date):
+    print(date)
+    formatted = datetime.strptime(date, "%Y-%m-%d").date()
+    return formatted

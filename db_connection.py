@@ -1,6 +1,7 @@
 import sqlite3
 from sqlite3 import Error
 from datetime import datetime
+from dateutil import parser
 
 
 class DbConnection:
@@ -317,14 +318,31 @@ class DbConnection:
         trello_cards_update = self.trello_connection.get_trello_cards()
 
         update_cursor = self.connection.cursor()
+        cards_without_id = self.get_db_card_without_date()
+        sanitized_cards = [x[0] for x in cards_without_id]
+
+        print(sanitized_cards)
 
         for data in trello_cards_update:
-            update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
-                           data['idList'], data['desc'], data['cover']['color'], data['isTemplate'], data['idShort'],
-                           data['due'], self.execution_time, data['id'])
-            query = 'UPDATE CARDS SET CARD_NAME = ? ,CARD_CLOSED = ?, CARD_DATE_LAST_ACTIVITY = ?, CARD_ID_BOARD = ?,' \
-                    'CARD_POS = ?, CARD_ID_LIST = ?, CARD_DESC = ?, CARD_COVER_COLOR = ?, CARD_IS_TEMPLATE = ?, '\
-                    'CARD_ID_SHORT = ?, CARD_DUE = ?, CARD_LAST_MODIFIED = ? WHERE CARD_ID = ?'
+            if data['id'] in sanitized_cards:
+                creation_date = self.get_card_create_date(data)
+                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                               data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                               data['idShort'],
+                               data['due'], creation_date, self.execution_time, data['id'])
+                query = 'UPDATE CARDS SET CARD_NAME = ? ,CARD_CLOSED = ?, ' \
+                        'CARD_DATE_LAST_ACTIVITY = ?, CARD_ID_BOARD = ?,' \
+                        'CARD_POS = ?, CARD_ID_LIST = ?, CARD_DESC = ?, CARD_COVER_COLOR = ?, CARD_IS_TEMPLATE = ?, ' \
+                        'CARD_ID_SHORT = ?, CARD_DUE = ?,CARD_CREATION_DATE= ?,CARD_LAST_MODIFIED = ? WHERE CARD_ID = ?'
+            else:
+                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                               data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                               data['idShort'],
+                               data['due'], self.execution_time, data['id'])
+                query = 'UPDATE CARDS SET CARD_NAME = ? ,CARD_CLOSED = ?, ' \
+                        'CARD_DATE_LAST_ACTIVITY = ?, CARD_ID_BOARD = ?,' \
+                        'CARD_POS = ?, CARD_ID_LIST = ?, CARD_DESC = ?, CARD_COVER_COLOR = ?, CARD_IS_TEMPLATE = ?, ' \
+                        'CARD_ID_SHORT = ?, CARD_DUE = ?,CARD_LAST_MODIFIED = ? WHERE CARD_ID = ?'
             try:
                 update_cursor.execute(query, update_data)
                 self.connection.commit()
@@ -465,7 +483,39 @@ class DbConnection:
             print(e)
             return 0
 
+    def get_card_create_date(self, card):
+
+        date = ''
+        action = self.trello_connection.get_cards_actions(card['id'], 'createCard')
+        if not action:
+            action = self.trello_connection.get_cards_actions(card['id'], 'copyCommentCard')
+            if not action:
+                action = self.trello_connection.get_cards_actions(card['id'], 'copyCard')
+                if not action:
+                    action = self.trello_connection.get_cards_actions(card['id'], 'addAttachmentToCard')
+                    if not action[len(action)-1]['appCreator']:
+                        action[0]['appCreator']
+                        print('Nne')
+                        action = None
+
+        if action:
+            print(action)
+            action = action.pop()
+            date = parser.parse(action['date']).date()
+        if date != '':
+            return date
+        else:
+            return None
+
+    def get_db_card_without_date(self):
+        cursor = self.connection.cursor()
+        query = 'SELECT CARD_ID FROM CARDS WHERE CARD_CREATION_DATE IS NULL'
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
+            return 0
 
     def close(self):
         self.connection.close()
-

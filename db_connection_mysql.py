@@ -2,6 +2,7 @@ import MySQLdb as mysql
 from MySQLdb import Error
 from datetime import datetime
 import os
+from dateutil import parser
 
 
 class MySQLConnection:
@@ -319,14 +320,29 @@ class MySQLConnection:
         trello_cards_update = self.trello_connection.get_trello_cards()
 
         update_cursor = self.connection.cursor()
+        cards_without_id = self.get_db_card_without_date()
+        sanitized_cards = [x[0] for x in cards_without_id]
 
         for data in trello_cards_update:
-            update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
-                           data['idList'], data['desc'], data['cover']['color'], data['isTemplate'], data['idShort'],
-                           data['due'], self.execution_time, data['id'])
-            query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
-                    'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = %s, '\
-                    'CARD_ID_SHORT = %s, CARD_DUE = %s, CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
+            if data['id'] in sanitized_cards:
+                creation_date = self.get_card_create_date(data)
+                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                               data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                               data['idShort'],
+                               data['due'], creation_date, self.execution_time, data['id'])
+                query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, ' \
+                        'CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
+                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = %s, ' \
+                        'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_CREATION_DATE= %s,CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
+            else:
+                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                               data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                               data['idShort'],
+                               data['due'], self.execution_time, data['id'])
+                query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, ' \
+                        'CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
+                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = %s, ' \
+                        'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
             try:
                 update_cursor.execute(query, update_data)
                 self.connection.commit()
@@ -451,6 +467,40 @@ class MySQLConnection:
             return cursor.lastrowid
         except Error as e:
             print(e)
+            return 0
+
+    def get_card_create_date(self, card):
+
+        date = ''
+        action = self.trello_connection.get_cards_actions(card['id'], 'createCard')
+        if not action:
+            action = self.trello_connection.get_cards_actions(card['id'], 'copyCommentCard')
+            if not action:
+                action = self.trello_connection.get_cards_actions(card['id'], 'copyCard')
+                if not action:
+                    action = self.trello_connection.get_cards_actions(card['id'], 'addAttachmentToCard')
+                    if not action[len(action)-1]['appCreator']:
+                        action[0]['appCreator']
+                        print('Nne')
+                        action = None
+
+        if action:
+            print(action)
+            action = action.pop()
+            date = parser.parse(action['date']).date()
+        if date != '':
+            return date
+        else:
+            return None
+
+    def get_db_card_without_date(self):
+        cursor = self.connection.cursor()
+        query = 'SELECT CARD_ID FROM CARDS WHERE CARD_CREATION_DATE IS NULL'
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
             return 0
 
     def close(self):

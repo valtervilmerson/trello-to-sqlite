@@ -5,7 +5,6 @@ from db_connection import DbConnection
 from datetime import datetime
 import utilities
 from db_connection_mysql import MySQLConnection
-import pandas
 
 
 def main(db_conn):
@@ -19,7 +18,6 @@ def main(db_conn):
 
     db_conn.insert_cards()
     db_conn.update_cards()
-    db_conn.delete_cards()
 
     db_conn.insert_actions()
 
@@ -37,12 +35,12 @@ def main(db_conn):
     print('Main Completed in ', datetime.now())
 
 
-def remove_cards_labels():
-    execution_date = sqlite.get_last_execution_date()
+def remove_cards_labels(trello, db):
+    execution_date = db.get_last_execution_date()
     date = datetime.strptime(execution_date, "%Y-%m-%d %H:%M:%S.%f").date()
 
     if datetime.today().isoweekday() == 1 and not date.isoweekday() == 1:
-        utilities.remove_cards_labels(trello_connection)
+        utilities.remove_cards_labels(trello)
 
 
 if __name__ == '__main__':
@@ -52,15 +50,14 @@ if __name__ == '__main__':
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
-    # sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
-    # mysql = MySQLConnection(trello_connection)
-    #
-    # main(sqlite)
-    # main(mysql)
-    #
-    # remove_cards_labels()
-    #
-    # sqlite.close()
-    # mysql.close()
+    sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
+    main(sqlite)
 
-    utilities.fix(trello_connection)
+    mysql = MySQLConnection(trello_connection)
+    main(mysql)
+
+    remove_cards_labels(trello_connection, sqlite)
+
+    sqlite.close()
+    mysql.close()
+
