@@ -321,8 +321,6 @@ class DbConnection:
         cards_without_id = self.get_db_card_without_date()
         sanitized_cards = [x[0] for x in cards_without_id]
 
-        print(sanitized_cards)
-
         for data in trello_cards_update:
             if data['id'] in sanitized_cards:
                 creation_date = self.get_card_create_date(data)

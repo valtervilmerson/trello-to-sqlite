@@ -332,8 +332,10 @@ class MySQLConnection:
                                data['due'], creation_date, self.execution_time, data['id'])
                 query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, ' \
                         'CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
-                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = %s, ' \
-                        'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_CREATION_DATE= %s,CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
+                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = ' \
+                        '%s, ' \
+                        'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_CREATION_DATE= %s,CARD_LAST_MODIFIED = %s WHERE ' \
+                        'CARD_ID = %s '
             else:
                 update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
                                data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
@@ -341,7 +343,8 @@ class MySQLConnection:
                                data['due'], self.execution_time, data['id'])
                 query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, ' \
                         'CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
-                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, CARD_IS_TEMPLATE = %s, ' \
+                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, '\
+                        'CARD_IS_TEMPLATE = %s, ' \
                         'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
             try:
                 update_cursor.execute(query, update_data)
@@ -479,7 +482,7 @@ class MySQLConnection:
                 action = self.trello_connection.get_cards_actions(card['id'], 'copyCard')
                 if not action:
                     action = self.trello_connection.get_cards_actions(card['id'], 'addAttachmentToCard')
-                    if not action[len(action)-1]['appCreator']:
+                    if not action[len(action) - 1]['appCreator']:
                         action[0]['appCreator']
                         print('Nne')
                         action = None
