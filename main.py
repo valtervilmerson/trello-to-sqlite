@@ -9,7 +9,8 @@ from db_connection_mysql import MySQLConnection
 
 def main(db_conn):
 
-    print('Main Started in ', datetime.now())
+    print('Main Started at ', datetime.now())
+
     execution_id = db_conn.execution_history()
 
     db_conn.insert_lists()
@@ -32,15 +33,17 @@ def main(db_conn):
     db_conn.insert_cards_labels(execution_id)
     db_conn.insert_board_state(execution_id)
 
-    print('Main Completed in ', datetime.now())
+    print('Main Completed at ', datetime.now())
 
 
 def remove_cards_labels(trello, db):
+    print('Remove_cards Started at ', datetime.now())
     execution_date = db.get_last_execution_date()
     date = datetime.strptime(execution_date, "%Y-%m-%d %H:%M:%S.%f").date()
 
     if datetime.today().isoweekday() == 1 and not date.isoweekday() == 1:
         utilities.remove_cards_labels(trello)
+    print('Remove_cards Completed at ', datetime.now())
 
 
 if __name__ == '__main__':
@@ -51,12 +54,11 @@ if __name__ == '__main__':
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
     sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
+    remove_cards_labels(trello_connection, sqlite)
     main(sqlite)
 
     mysql = MySQLConnection(trello_connection)
     main(mysql)
-
-    remove_cards_labels(trello_connection, sqlite)
 
     sqlite.close()
     mysql.close()

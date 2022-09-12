@@ -27,7 +27,7 @@ class TrelloConnection(TrelloApi):
         return trello_actions
 
     def get_trello_labels(self):
-        trello_labels = self.trello_connection.boards.get_label(self.board)
+        trello_labels = self.trello_connection.boards.get_label(self.board, limit=100)
         return trello_labels
 
     def get_cards_actions(self, card_id, param):

@@ -282,6 +282,7 @@ class DbConnection:
     def update_labels(self):
 
         trello_labels_update = self.trello_connection.get_trello_labels()
+        print(trello_labels_update)
 
         update_cursor = self.connection.cursor()
 
@@ -493,11 +494,9 @@ class DbConnection:
                     action = self.trello_connection.get_cards_actions(card['id'], 'addAttachmentToCard')
                     if not action[len(action)-1]['appCreator']:
                         action[0]['appCreator']
-                        print('Nne')
                         action = None
 
         if action:
-            print(action)
             action = action.pop()
             date = parser.parse(action['date']).date()
         if date != '':
