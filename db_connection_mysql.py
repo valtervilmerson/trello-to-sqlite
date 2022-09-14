@@ -356,7 +356,7 @@ class MySQLConnection:
     def cfd_priority_definition(self):
         query = 'UPDATE CFD_PRIORITY_ORDER ' \
                 'JOIN LISTS ON LIST_ID = PRIORITY_ID_LIST ' \
-                'SET PRIORITY_ORDER = %s, PRIORITY_LIST_NAME = %s + " - " + LIST_NAME ' \
+                'SET PRIORITY_ORDER = %s, PRIORITY_LIST_NAME = CONCAT(%s, " - " , LIST_NAME) ' \
                 'WHERE PRIORITY_ID_LIST = %s'
         db_lists = self.get_db_lists()
         cursor = self.connection.cursor()

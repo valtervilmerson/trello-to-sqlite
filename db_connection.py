@@ -282,7 +282,6 @@ class DbConnection:
     def update_labels(self):
 
         trello_labels_update = self.trello_connection.get_trello_labels()
-        print(trello_labels_update)
 
         update_cursor = self.connection.cursor()
 
