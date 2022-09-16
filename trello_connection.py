@@ -23,7 +23,7 @@ class TrelloConnection(TrelloApi):
         return trello_cards
 
     def get_trello_board_actions(self):
-        trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard')
+        trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard', limit=100)
         return trello_actions
 
     def get_trello_labels(self):

@@ -43,6 +43,8 @@ def remove_cards_labels(trello, db):
 
     if datetime.today().isoweekday() == 1 and not date.isoweekday() == 1:
         utilities.remove_cards_labels(trello)
+    else:
+        print('Hoje não é segunda. É isso mesmo, produção?')
     print('Remove_cards Completed at ', datetime.now())
 
 
