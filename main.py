@@ -41,7 +41,7 @@ def remove_cards_labels(trello, db):
     execution_date = db.get_last_execution_date()
     date = datetime.strptime(execution_date, "%Y-%m-%d %H:%M:%S.%f").date()
 
-    if datetime.today().isoweekday() == 1 and not date.isoweekday() == 1:
+    if datetime.today().isoweekday() == 1:
         utilities.remove_cards_labels(trello)
     else:
         print('Hoje não é segunda. É isso mesmo, produção?')
@@ -56,11 +56,12 @@ if __name__ == '__main__':
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
     sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
-    remove_cards_labels(trello_connection, sqlite)
     main(sqlite)
 
     mysql = MySQLConnection(trello_connection)
     main(mysql)
+
+    remove_cards_labels(trello_connection, sqlite)
 
     sqlite.close()
     mysql.close()
