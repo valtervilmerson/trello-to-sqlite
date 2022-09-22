@@ -56,3 +56,7 @@ class TrelloConnection(TrelloApi):
     def delete_card_label(self, id_label: str, card_id: str):
         deleted_label = self.trello_connection.cards.delete_idLabel_idLabel(id_label, card_id)
         return deleted_label
+
+    def get_members_from_board(self):
+        members = self.trello_connection.boards.get_member(self.board)
+        return members

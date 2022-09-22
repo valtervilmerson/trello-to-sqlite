@@ -504,5 +504,35 @@ class MySQLConnection:
         except Error as e:
             return 0
 
+    def get_db_members(self):
+        query = 'select * from MEMBER'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
+            print(e)
+            return 0
+
+    def insert_db_members(self):
+        trello_members = self.trello_connection.get_trello_()
+        db_lists = self.get_db_lists()
+
+        sanitized_db_lists_ids = [x[0] for x in db_lists]
+        sanitized_trello_lists = [y['id'] for y in trello_lists]
+
+        exclusive_lists = [x for x in sanitized_db_lists_ids if x not in sanitized_trello_lists]
+
+        cursor = self.connection.cursor()
+
+        for list_id in exclusive_lists:
+            try:
+                cursor.execute("DELETE FROM LISTS WHERE LIST_ID = '" + list_id + "'")
+                self.connection.commit()
+            except Error as e:
+                print(e)
+                return 0
+
     def close(self):
         self.connection.close()
