@@ -505,7 +505,7 @@ class MySQLConnection:
             return 0
 
     def get_db_members(self):
-        query = 'select * from MEMBER'
+        query = 'SELECT MEMBER_ID FROM MEMBER'
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -516,23 +516,29 @@ class MySQLConnection:
             return 0
 
     def insert_db_members(self):
-        trello_members = self.trello_connection.get_trello_()
-        db_lists = self.get_db_lists()
+        inserted_rows = []
 
-        sanitized_db_lists_ids = [x[0] for x in db_lists]
-        sanitized_trello_lists = [y['id'] for y in trello_lists]
+        trello_members = self.trello_connection.get_members_from_board()
+        db_members_ids = self.get_db_members()
 
-        exclusive_lists = [x for x in sanitized_db_lists_ids if x not in sanitized_trello_lists]
+        sanitized_db_members_ids = [x[0] for x in db_members_ids]
+        exclusive_members = [x for x in trello_members if x['id'] not in sanitized_db_members_ids]
 
         cursor = self.connection.cursor()
 
-        for list_id in exclusive_lists:
+        for data in exclusive_members:
+            insert_data = (data['id'], data['name'], data['closed'], data['idBoard'], data['pos'])
+            query = 'INSERT INTO LISTS (LIST_ID, LIST_NAME ,LIST_CLOSED, LIST_ID_BOARD, LIST_POS) VALUES (%s, %s, %s,' \
+                    '%s, %s)'
             try:
-                cursor.execute("DELETE FROM LISTS WHERE LIST_ID = '" + list_id + "'")
+                cursor.execute(query, insert_data)
                 self.connection.commit()
+                inserted_rows.append(cursor.lastrowid)
             except Error as e:
                 print(e)
-                return 0
+                return e
+        return inserted_rows
 
-    def close(self):
+
+def close(self):
         self.connection.close()
