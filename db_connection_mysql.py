@@ -526,19 +526,21 @@ class MySQLConnection:
 
         cursor = self.connection.cursor()
 
-        for data in exclusive_members:
-            insert_data = (data['id'], data['name'], data['closed'], data['idBoard'], data['pos'])
-            query = 'INSERT INTO LISTS (LIST_ID, LIST_NAME ,LIST_CLOSED, LIST_ID_BOARD, LIST_POS) VALUES (%s, %s, %s,' \
-                    '%s, %s)'
-            try:
-                cursor.execute(query, insert_data)
-                self.connection.commit()
-                inserted_rows.append(cursor.lastrowid)
-            except Error as e:
-                print(e)
-                return e
-        return inserted_rows
+        print(exclusive_members)
 
+        if len(exclusive_members) > 0:
+            for data in exclusive_members:
+                insert_data = (data['id'], data['fullName'], data['username'])
+                query = 'INSERT INTO MEMBER (MEMBER_ID, MEMBER_FULL_NAME ,MEMBER_USER_NAME) VALUES (%s, %s, %s)'
+                try:
+                    cursor.execute(query, insert_data)
+                    self.connection.commit()
+                    inserted_rows.append(cursor.lastrowid)
+                except Error as e:
+                    print(e)
+                    return e
+            return inserted_rows
 
-def close(self):
+    def close(self):
         self.connection.close()
+

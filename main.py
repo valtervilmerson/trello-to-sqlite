@@ -30,16 +30,16 @@ def main(db_conn):
     db_conn.insert_labels()
     db_conn.update_labels()
 
+    db_conn.insert_db_members()
+
     db_conn.insert_cards_labels(execution_id)
     db_conn.insert_board_state(execution_id)
 
     print('Main Completed at ', datetime.now())
 
 
-def remove_cards_labels(trello, db):
+def remove_cards_labels(trello):
     print('Remove_cards Started at ', datetime.now())
-    execution_date = db.get_last_execution_date()
-    date = datetime.strptime(execution_date, "%Y-%m-%d %H:%M:%S.%f").date()
 
     if datetime.today().isoweekday() == 1:
         utilities.remove_cards_labels(trello)
@@ -55,16 +55,14 @@ if __name__ == '__main__':
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
-    # members = trello_connection.get_members_from_board()
-    # print(members)
-
     sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
     main(sqlite)
 
     mysql = MySQLConnection(trello_connection)
+    mysql.insert_db_members()
     main(mysql)
 
-    remove_cards_labels(trello_connection, sqlite)
+    remove_cards_labels(trello_connection)
 
     sqlite.close()
     mysql.close()
