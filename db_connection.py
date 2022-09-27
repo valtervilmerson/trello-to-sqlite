@@ -513,5 +513,42 @@ class DbConnection:
         except Error as e:
             return 0
 
+    def get_db_members(self):
+        query = 'SELECT MEMBER_ID FROM MEMBER'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
+            print(e)
+            return 0
+
+    def insert_db_members(self):
+        inserted_rows = []
+
+        trello_members = self.trello_connection.get_members_from_board()
+        db_members_ids = self.get_db_members()
+
+        sanitized_db_members_ids = [x[0] for x in db_members_ids]
+        exclusive_members = [x for x in trello_members if x['id'] not in sanitized_db_members_ids]
+
+        cursor = self.connection.cursor()
+
+        print(exclusive_members)
+
+        if len(exclusive_members) > 0:
+            for data in exclusive_members:
+                insert_data = (data['id'], data['fullName'], data['username'])
+                query = 'INSERT INTO MEMBER (MEMBER_ID, MEMBER_FULL_NAME ,MEMBER_USER_NAME) VALUES (?, ?, ?)'
+                try:
+                    cursor.execute(query, insert_data)
+                    self.connection.commit()
+                    inserted_rows.append(cursor.lastrowid)
+                except Error as e:
+                    print(e)
+                    return e
+            return inserted_rows
+
     def close(self):
         self.connection.close()
