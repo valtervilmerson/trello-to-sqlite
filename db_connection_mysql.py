@@ -526,8 +526,6 @@ class MySQLConnection:
 
         cursor = self.connection.cursor()
 
-        print(exclusive_members)
-
         if len(exclusive_members) > 0:
             for data in exclusive_members:
                 insert_data = (data['id'], data['fullName'], data['username'])
