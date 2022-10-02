@@ -23,11 +23,11 @@ class TrelloConnection(TrelloApi):
         return trello_cards
 
     def get_trello_board_actions(self):
-        trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard', limit=100)
+        trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard', limit=1000)
         return trello_actions
 
     def get_trello_labels(self):
-        trello_labels = self.trello_connection.boards.get_label(self.board, limit=100)
+        trello_labels = self.trello_connection.boards.get_label(self.board, limit=1000)
         return trello_labels
 
     def get_cards_actions(self, card_id, param):
@@ -60,3 +60,79 @@ class TrelloConnection(TrelloApi):
     def get_members_from_board(self):
         members = self.trello_connection.boards.get_member(self.board)
         return members
+
+    def get_all_board_actions(self, db_connection=''):
+        list_of_actions = ["updateCard", "copyCard", "createCard", "deleteCard", "moveCardToBoard"]
+        limit = 1000
+        action_id = ''
+        formatted_board_actions = []
+        action_list = []
+        check = []
+        action_object = {}
+        interface = {
+            "id": "id",
+            "idMemberCreator": "idMemberCreator",
+            "cardId": "data.card.id",
+            "boardId": "data.board.id",
+            "listBefore": "data.listBefore.id",
+            "listAfter": "data.listAfter.id",
+            "type": "type",
+            "date": "date",
+            "cardPos": "data.card.pos",
+            "oldPos": "data.old.pos",
+            "listId": "data.list.id",
+            "appCreator": "appCreator.name",
+            "translationKey": "display.translationKey",
+            "labelId": "data.label.id",
+            "cardSource": "data.cardSource.id",
+            "boardSource": "data.boardSource.id"
+        }
+        default_dict = interface
+
+        for action in list_of_actions:
+            print(action)
+            response_is_empty = False
+            num_execution = 0
+            board_actions = []
+
+            while not response_is_empty:
+                if num_execution == 0:
+                    actions = self.trello_connection.boards.get_action(self.board, filter=action, limit=limit)
+                    board_actions = board_actions + actions
+                elif num_execution > 0:
+                    actions = self.trello_connection.boards.get_action(self.board, filter=action, limit=limit,
+                                                                       before=action_id)
+                    board_actions = board_actions + actions
+                num_execution = num_execution + 1
+                if len(actions) == 0:
+                    response_is_empty = True
+                elif len(actions) > 0:
+                    action_id = actions[-1]['id']
+                if num_execution == 50:
+                    break
+                if num_execution == 1:
+                    break
+            for item in board_actions:
+                for key in default_dict:
+                    splitted_values = default_dict[key].split('.')
+                    if splitted_values[0] in item:
+                        action_list.append(item[splitted_values[0]])
+                    else:
+                        action_object[key] = None
+                        continue
+                    for index, value in enumerate(splitted_values):
+                        if index > 0:
+                            if action_list[0] is not None:
+                                if value in action_list[0]:
+                                    action_list[0] = action_list[0][value]
+                                else:
+                                    action_list[0] = None
+                    action_object[key] = action_list[0]
+                    action_list = []
+                formatted_board_actions.append(action_object)
+                action_object = {}
+            check.append(board_actions)
+
+        print(len(board_actions))
+        print(check)
+        print(formatted_board_actions)

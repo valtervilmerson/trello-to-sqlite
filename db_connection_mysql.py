@@ -150,10 +150,10 @@ class MySQLConnection:
             if 'listBefore' in data['data']:
                 insert_data = (data['id'], data['idMemberCreator'], data['data']['card']['id'],
                                data['data']['board']['id'], data['data']['listBefore']['id'],
-                               data['data']['listAfter']['id'], data['type'], data['date'])
+                               data['data']['listAfter']['id'], data['type'], data['date'], 'PYTHON')
                 query = 'INSERT INTO ACTIONS (ACTION_ID, ACTION_ID_MEMBER_CREATOR ,ACTION_CARD_ID, ACTION_BOARD_ID,' \
-                        'ACTION_LIST_BEFORE, ACTION_LIST_AFTER, ACTION_TYPE, ACTION_DATE)' \
-                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s)'
+                        'ACTION_LIST_BEFORE, ACTION_LIST_AFTER, ACTION_TYPE, ACTION_DATE, ACTION_INSERT_SOURCE)' \
+                        'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)'
                 try:
                     cursor.execute(query, insert_data)
                     self.connection.commit()

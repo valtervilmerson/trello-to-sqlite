@@ -55,14 +55,12 @@ if __name__ == '__main__':
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
 
-    sqlite = DbConnection(os.getenv('SQLITE3_FILE_PATH'), trello_connection)
-    main(sqlite)
-
-    mysql = MySQLConnection(trello_connection)
-    main(mysql)
-
-    remove_cards_labels(trello_connection)
-
-    sqlite.close()
-    mysql.close()
+    trello_connection.get_all_board_actions()
+    #
+    # mysql = MySQLConnection(trello_connection)
+    # main(mysql)
+    #
+    # remove_cards_labels(trello_connection)
+    #
+    # mysql.close()
 
