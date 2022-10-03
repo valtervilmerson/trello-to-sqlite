@@ -122,11 +122,12 @@ class MySQLConnection:
 
         for data in exclusive_cards:
             insert_data = (data['id'], data['name'], data['closed'], data['dateLastActivity'], data['idBoard'],
-                           data['pos'], data['idList'],
-                           data['desc'], data['cover']['color'], data['isTemplate'], data['idShort'], data['due'])
+                           data['pos'], data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                           data['idShort'], data['due'], data['shortUrl'])
             query = 'INSERT INTO CARDS (CARD_ID, CARD_NAME, CARD_CLOSED, CARD_DATE_LAST_ACTIVITY, CARD_ID_BOARD,' \
-                    'CARD_POS, CARD_ID_LIST, CARD_DESC, CARD_COVER_COLOR, CARD_IS_TEMPLATE, CARD_ID_SHORT, CARD_DUE)' \
-                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+                    'CARD_POS, CARD_ID_LIST, CARD_DESC, CARD_COVER_COLOR, CARD_IS_TEMPLATE, CARD_ID_SHORT, ' \
+                    'CARD_DUE, SHORT_URL)' \
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
             try:
                 cursor.execute(query, insert_data)
                 self.connection.commit()

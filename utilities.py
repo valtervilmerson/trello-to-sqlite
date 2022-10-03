@@ -84,6 +84,21 @@ def fix(trello_connection):
                     trello_connection.delete_card_label(label, card['id'])
 
 
+def update_short_link(trello_connection, db_connection):
+    cards = trello_connection.get_trello_cards()
+    update_cursor = db_connection.connection.cursor()
+
+    for data in cards:
+        update_data = (data['shortUrl'], data['id'])
+        query = 'UPDATE CARDS SET CARD_SHORT_URL = %s WHERE CARD_ID = %s'
+        try:
+            update_cursor.execute(query, update_data)
+        except:
+            print("errooou")
+    db_connection.connection.commit()
+
+
+
 def iso_date_to_standard(date):
     print(date)
     formatted = datetime.strptime(date, "%Y-%m-%d").date()
