@@ -61,13 +61,11 @@ class TrelloConnection(TrelloApi):
         members = self.trello_connection.boards.get_member(self.board)
         return members
 
-    def get_all_board_actions(self, db_connection=''):
+    def get_all_board_actions_formatted(self, limit=1000):
         list_of_actions = ["updateCard", "copyCard", "createCard", "deleteCard", "moveCardToBoard"]
-        limit = 1000
         action_id = ''
         formatted_board_actions = []
         action_list = []
-        check = []
         action_object = {}
         interface = {
             "id": "id",
@@ -90,7 +88,6 @@ class TrelloConnection(TrelloApi):
         default_dict = interface
 
         for action in list_of_actions:
-            print(action)
             response_is_empty = False
             num_execution = 0
             board_actions = []
@@ -109,8 +106,7 @@ class TrelloConnection(TrelloApi):
                 elif len(actions) > 0:
                     action_id = actions[-1]['id']
                 if num_execution == 50:
-                    break
-                if num_execution == 1:
+                    print('num_execution reached 50')
                     break
             for item in board_actions:
                 for key in default_dict:
@@ -131,8 +127,5 @@ class TrelloConnection(TrelloApi):
                     action_list = []
                 formatted_board_actions.append(action_object)
                 action_object = {}
-            check.append(board_actions)
-
-        print(len(board_actions))
-        print(check)
-        print(formatted_board_actions)
+        print('Total actions from board: {}'.format(len(formatted_board_actions)))
+        return formatted_board_actions
