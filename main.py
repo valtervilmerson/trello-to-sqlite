@@ -14,7 +14,6 @@ def main(db_conn):
 
     db_conn.insert_lists()
     db_conn.update_lists()
-    db_conn.delete_lists()
 
     db_conn.insert_cards()
     db_conn.update_cards()

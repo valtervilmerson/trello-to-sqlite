@@ -112,7 +112,7 @@ class MySQLConnection:
     def insert_cards(self):
         inserted_rows = []
 
-        trello_cards = self.trello_connection.get_trello_cards()
+        trello_cards = self.trello_connection.get_all_cards()
         db_cards_ids = self.get_db_cards_ids()
 
         sanitized_db_cards_ids = [x[0] for x in db_cards_ids]
@@ -318,7 +318,7 @@ class MySQLConnection:
 
     def update_cards(self):
 
-        trello_cards_update = self.trello_connection.get_trello_cards()
+        trello_cards_update = self.trello_connection.get_all_cards()
 
         update_cursor = self.connection.cursor()
         cards_without_id = self.get_db_card_without_date()
@@ -372,7 +372,7 @@ class MySQLConnection:
                 return e
             counter = counter + 1
 
-    def delete_labels(self):
+    def update_labels(self):
 
         db_labels_ids = self.get_db_labels_ids()
         trello_labels = self.trello_connection.get_trello_labels()
@@ -384,7 +384,7 @@ class MySQLConnection:
         cursor = self.connection.cursor()
 
         for data in exclusive_labels:
-            query = "DELETE FROM LABELS WHERE LABEL_ID = '" + data + "'"
+            query = "UPDATE LABELS SET LABEL_CLOSED = 1 WHERE LABEL_ID = '" + data + "'"
             try:
                 cursor.execute(query)
                 self.connection.commit()
@@ -426,7 +426,7 @@ class MySQLConnection:
 
         for card_id in exclusive_cards:
             try:
-                cursor.execute("DELETE FROM CARDS WHERE CARD_ID = '" + card_id + "'")
+                cursor.execute("UPDATE CARDS SET CARD_CLOSED = 1 WHERE CARD_ID = '" + card_id + "'")
                 self.connection.commit()
             except Error as e:
                 print(e)

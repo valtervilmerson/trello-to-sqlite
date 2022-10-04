@@ -22,6 +22,10 @@ class TrelloConnection(TrelloApi):
         trello_cards = self.trello_connection.boards.get_card(self.board)
         return trello_cards
 
+    def get_all_cards(self):
+        trello_all_cards = self.trello_connection.boards.get_card_filter('all', self.board)
+        return trello_all_cards
+
     def get_trello_board_actions(self):
         trello_actions = self.trello_connection.boards.get_action(self.board, filter='updateCard', limit=1000)
         return trello_actions
