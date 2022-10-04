@@ -126,7 +126,7 @@ class MySQLConnection:
                            data['idShort'], data['due'], data['shortUrl'])
             query = 'INSERT INTO CARDS (CARD_ID, CARD_NAME, CARD_CLOSED, CARD_DATE_LAST_ACTIVITY, CARD_ID_BOARD,' \
                     'CARD_POS, CARD_ID_LIST, CARD_DESC, CARD_COVER_COLOR, CARD_IS_TEMPLATE, CARD_ID_SHORT, ' \
-                    'CARD_DUE, SHORT_URL)' \
+                    'CARD_DUE, CARD_SHORT_URL)' \
                     'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
             try:
                 cursor.execute(query, insert_data)
