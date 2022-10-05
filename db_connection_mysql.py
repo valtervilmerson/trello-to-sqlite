@@ -175,6 +175,7 @@ class MySQLConnection:
                 'FROM ' \
                 'CARDS ' \
                 'INNER JOIN LISTS ON LIST_ID = CARD_ID_LIST ' \
+                'WHERE CARD_CLOSED = 0 ' \
                 'GROUP BY ' \
                 'LIST_NAME' \
                 ',LIST_CREATE_DATE'
