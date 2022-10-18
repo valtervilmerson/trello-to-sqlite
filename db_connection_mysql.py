@@ -322,8 +322,8 @@ class MySQLConnection:
         trello_cards_update = self.trello_connection.get_all_cards()
 
         update_cursor = self.connection.cursor()
-        cards_without_id = self.get_db_card_without_date()
-        sanitized_cards = [x[0] for x in cards_without_id]
+        cards_without_date = self.get_db_card_without_date()
+        sanitized_cards = [x[0] for x in cards_without_date]
 
         for data in trello_cards_update:
             if data['id'] in sanitized_cards:
@@ -393,7 +393,7 @@ class MySQLConnection:
                 print(e)
                 return e
 
-    def delete_lists(self):
+    def close_lists(self):
 
         trello_lists = self.trello_connection.get_trello_lists()
         db_lists = self.get_db_lists()
@@ -407,13 +407,13 @@ class MySQLConnection:
 
         for list_id in exclusive_lists:
             try:
-                cursor.execute("DELETE FROM LISTS WHERE LIST_ID = '" + list_id + "'")
+                cursor.execute("UPDATE LISTS SET LIST_CLOSED = 1 WHERE LIST_ID = '" + list_id + "'")
                 self.connection.commit()
             except Error as e:
                 print(e)
                 return 0
 
-    def delete_cards(self):
+    def close_cards(self):
 
         trello_cards = self.trello_connection.get_trello_cards()
         db_cards = self.get_db_cards_ids()

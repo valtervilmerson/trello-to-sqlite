@@ -14,9 +14,11 @@ def main(db_conn):
 
     db_conn.insert_lists()
     db_conn.update_lists()
+    db_conn.close_lists()
 
     db_conn.insert_cards()
     db_conn.update_cards()
+    db_conn.close_cards()
 
     db_conn.insert_cfd()
     db_conn.insert_cfd_priority_order()
