@@ -167,9 +167,9 @@ class MySQLConnection:
 
     def insert_cfd(self):
         inserted_rows = []
-        query = 'INSERT INTO CFD (CFD_LIST_ID, CFD_TOTAL_CARDS, CFD_PROCESSING_DATE)' \
-                'SELECT ' \
-                'LIST_ID AS CFD_LIST_NAME' \
+        query = 'INSERT INTO CFD (CFD_BOARD_ID, CFD_LIST_ID, CFD_TOTAL_CARDS, CFD_PROCESSING_DATE) ' \
+                'SELECT LIST_ID_BOARD AS CFD_BOARD_ID ' \
+                ',LIST_ID AS CFD_LIST_NAME ' \
                 ',COUNT(CARD_ID) AS CFD_TOTAL_TASKS' \
                 ',NOW() AS CFD_PROCESSING_DATE ' \
                 'FROM ' \
@@ -177,8 +177,7 @@ class MySQLConnection:
                 'INNER JOIN LISTS ON LIST_ID = CARD_ID_LIST ' \
                 'WHERE CARD_CLOSED = 0 ' \
                 'GROUP BY ' \
-                'LIST_NAME' \
-                ',LIST_CREATE_DATE'
+                'LIST_NAME'
 
         cursor = self.connection.cursor()
 
@@ -193,14 +192,16 @@ class MySQLConnection:
     def insert_cfd_priority_order(self):
 
         inserted_rows = []
-        query = 'INSERT INTO CFD_PRIORITY_ORDER (PRIORITY_ID_LIST, PRIORITY_ORDER) ' \
-                'SELECT ' \
-                'LIST_ID' \
+        query = 'INSERT INTO CFD_PRIORITY_ORDER (PRIORITY_ID_BOARD,PRIORITY_ID_LIST, PRIORITY_ORDER) ' \
+                'SELECT LIST_ID_BOARD' \
+                ',LIST_ID' \
                 ',0 ' \
                 'FROM ' \
                 'LISTS ' \
                 'WHERE ' \
-                'LIST_ID NOT IN (SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER)'
+                'LIST_ID NOT IN (SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER ' \
+                'WHERE PRIORITY_ID_BOARD = "' + self.trello_connection.board + '") AND '\
+                'LIST_ID_BOARD = "' + self.trello_connection.board + '"'
 
         cursor = self.connection.cursor()
 
@@ -265,14 +266,14 @@ class MySQLConnection:
         for card in trello_cards:
             if len(card['idLabels']) > 0:
                 for label_id in card['idLabels']:
-                    labels.append((card['id'], label_id))
+                    labels.append((card['id'], label_id, card['idBoard']))
 
         cursor = self.connection.cursor()
 
         for data in labels:
-            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID, CL_CREATE_DATE, CL_STATE_ID)' \
+            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID,CL_BOARD_ID, CL_CREATE_DATE, CL_STATE_ID)' \
                     'VALUES (%s, %s, %s, %s)'
-            insert_data = (data[0], data[1], self.execution_time, execution_id)
+            insert_data = (data[0], data[1], data[2], self.execution_time, execution_id)
 
             try:
                 cursor.execute(query, insert_data)
@@ -507,7 +508,7 @@ class MySQLConnection:
             return 0
 
     def get_db_members(self):
-        query = 'SELECT MEMBER_ID FROM MEMBER'
+        query = 'SELECT MEMBER_ID FROM MEMBER WHERE MEMBER_BOARD_ID = "' + self.trello_connection.board + '"'
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -530,8 +531,9 @@ class MySQLConnection:
 
         if len(exclusive_members) > 0:
             for data in exclusive_members:
-                insert_data = (data['id'], data['fullName'], data['username'])
-                query = 'INSERT INTO MEMBER (MEMBER_ID, MEMBER_FULL_NAME ,MEMBER_USER_NAME) VALUES (%s, %s, %s)'
+                insert_data = (data['id'], data['fullName'], data['username'], self.trello_connection.board)
+                query = 'INSERT INTO MEMBER (MEMBER_ID, MEMBER_FULL_NAME ,MEMBER_USER_NAME, MEMBER_BOARD_ID) VALUES ' \
+                        '(%s, %s, %s, %s)'
                 try:
                     cursor.execute(query, insert_data)
                     self.connection.commit()
@@ -572,6 +574,17 @@ class MySQLConnection:
                 return e
         print("{} actions were inserted".format(len(inserted_rows)))
         return inserted_rows
+
+    def get_active_boards(self):
+        query = 'SELECT BOARD_ID FROM BOARDS WHERE BOARD_ACTIVE = 1'
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
+            print(e)
+            return 0
 
     def close(self):
         self.connection.close()

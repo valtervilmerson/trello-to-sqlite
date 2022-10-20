@@ -67,6 +67,5 @@ if __name__ == '__main__':
     insert_all_board_actions(trello_connection, mysql)
     main(mysql)
     remove_cards_labels(trello_connection)
-
     mysql.close()
 
