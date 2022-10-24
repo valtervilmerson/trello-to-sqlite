@@ -282,8 +282,8 @@ class MySQLConnection:
         cursor = self.connection.cursor()
 
         for data in labels:
-            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID,CL_BOARD_ID, CL_CREATE_DATE, CL_STATE_ID)' \
-                    'VALUES (%s, %s, %s, %s)'
+            query = 'INSERT INTO CARDS_LABELS (CL_CARD_ID, CL_LABEL_ID, CL_BOARD_ID, CL_INSERTED_AT, CL_STATE_ID)' \
+                    'VALUES (%s, %s, %s, %s, %s)'
             insert_data = (data[0], data[1], data[2], self.execution_time, execution_id)
 
             try:
