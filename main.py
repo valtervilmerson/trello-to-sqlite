@@ -37,12 +37,10 @@ def main(db_conn):
 
 
 def remove_cards_labels(trello):
-    print('Remove_cards Started at ', datetime.now())
     if datetime.today().isoweekday() == 1:
         utilities.remove_cards_labels(trello)
     else:
         print('Executado apenas nas segundas-feiras')
-    print('Remove_cards Completed at ', datetime.now())
 
 
 def insert_all_board_actions(trello_conn, db_conn):
