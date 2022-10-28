@@ -3,6 +3,10 @@ from MySQLdb import Error
 from datetime import datetime
 import os
 from dateutil import parser
+from dotenv import load_dotenv
+
+load_dotenv()
+environment = os.getenv('APP_ENVIRONMENT')
 
 
 class MySQLConnection:
@@ -12,15 +16,23 @@ class MySQLConnection:
         self.execution_time = datetime.now()
         self.trello_connection = trello_conn
         try:
-            self.connection = mysql.connect(user=os.getenv('MYSQL_USER'), passwd=os.getenv('MYSQL_PASSWORD'),
-                                            db=os.getenv('MYSQL_DATABASE'), host=os.getenv('MYSQL_HOST'))
+            if environment == 'production':
+                self.connection = mysql.connect(user=os.getenv('MYSQL_USER'), passwd=os.getenv('MYSQL_PASSWORD'),
+                                                db=os.getenv('MYSQL_DATABASE'), host=os.getenv('MYSQL_HOST'))
+            elif environment == 'railway-development':
+                self.connection = mysql.connect(user=os.getenv('RAILWAY_MYSQL_USER'),
+                                                passwd=os.getenv('RAILWAY_MYSQL_PASSWORD'),
+                                                db=os.getenv('RAILWAY_MYSQL_DATABASE'),
+                                                host=os.getenv('RAILWAY_MYSQL_HOST'),
+                                                port=int(os.getenv('RAILWAY_MYSQL_PORT')))
         except Error as e:
             print(e)
             return 0
 
     def get_db_cards_labels(self):
         print('get_db_cards_labels started at:', datetime.now())
-        query = 'SELECT CL_CARD_ID, CL_LABEL_ID FROM CARDS_LABELS'
+        query = "SELECT CL_CARD_ID, CL_LABEL_ID FROM CARDS_LABELS " \
+                "WHERE CL_BOARD_ID = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -32,7 +44,8 @@ class MySQLConnection:
 
     def get_db_lists(self):
         print('get_db_lists started at:', datetime.now())
-        query = 'SELECT LIST_ID FROM LISTS ORDER BY LIST_POS DESC'
+        query = 'SELECT LIST_ID FROM LISTS WHERE ' \
+                "LIST_ID_BOARD = '" + self.trello_connection.board + "' ORDER BY LIST_POS DESC"
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -44,7 +57,7 @@ class MySQLConnection:
 
     def get_db_labels_ids(self):
         print('get_db_labels_ids started at:', datetime.now())
-        query = 'SELECT LABEL_ID FROM LABELS'
+        query = "SELECT LABEL_ID FROM LABELS WHERE LABEL_ID_BOARD = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -56,7 +69,7 @@ class MySQLConnection:
 
     def get_db_cards_ids(self):
         print('get_db_cards_ids started at:', datetime.now())
-        query = 'SELECT CARD_ID FROM CARDS'
+        query = "SELECT CARD_ID FROM CARDS WHERE CARD_ID_BOARD ='" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -68,7 +81,7 @@ class MySQLConnection:
 
     def get_db_board_actions_ids(self):
         print('get_db_board_actions_ids started at:', datetime.now())
-        query = 'SELECT ACTION_ID FROM ACTIONS'
+        query = "SELECT ACTION_ID FROM ACTIONS WHERE ACTION_BOARD_ID = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
             cursor.execute(query)
@@ -80,7 +93,8 @@ class MySQLConnection:
 
     def get_cfd_priority_list(self):
         print('get_cfd_priority_list started at:', datetime.now())
-        query = 'SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER'
+        query = "SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER " \
+                "WHERE PRIORITY_ID_BOARD ='" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
 
         try:
@@ -129,9 +143,11 @@ class MySQLConnection:
         cursor = self.connection.cursor()
 
         for data in exclusive_cards:
-            insert_data = (data['id'], data['name'], data['closed'], data['dateLastActivity'], data['idBoard'],
-                           data['pos'], data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
-                           data['idShort'], data['due'], data['shortUrl'])
+            insert_data = (
+                data['id'], data['name'], data['closed'], parser.parse(data['dateLastActivity']).date(),
+                data['idBoard'],
+                data['pos'], data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
+                data['idShort'], data['due'], data['shortUrl'])
             query = 'INSERT INTO CARDS (CARD_ID, CARD_NAME, CARD_CLOSED, CARD_DATE_LAST_ACTIVITY, CARD_ID_BOARD,' \
                     'CARD_POS, CARD_ID_LIST, CARD_DESC, CARD_COVER_COLOR, CARD_IS_TEMPLATE, CARD_ID_SHORT, ' \
                     'CARD_DUE, CARD_SHORT_URL)' \
@@ -180,14 +196,15 @@ class MySQLConnection:
         query = 'INSERT INTO CFD (CFD_BOARD_ID, CFD_LIST_ID, CFD_TOTAL_CARDS, CFD_PROCESSING_DATE) ' \
                 'SELECT LIST_ID_BOARD AS CFD_BOARD_ID ' \
                 ',LIST_ID AS CFD_LIST_NAME ' \
-                ',COUNT(CARD_ID) AS CFD_TOTAL_TASKS' \
+                ',COUNT(CARD_ID) AS CFD_TOTAL_TASKS ' \
                 ',NOW() AS CFD_PROCESSING_DATE ' \
                 'FROM ' \
                 'CARDS ' \
                 'INNER JOIN LISTS ON LIST_ID = CARD_ID_LIST ' \
                 'WHERE CARD_CLOSED = 0 ' \
-                'GROUP BY ' \
-                'LIST_NAME'
+                'GROUP BY  ' \
+                'LIST_ID_BOARD ' \
+                ',LIST_ID'
 
         cursor = self.connection.cursor()
 
@@ -210,8 +227,8 @@ class MySQLConnection:
                 'LISTS ' \
                 'WHERE ' \
                 'LIST_ID NOT IN (SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER ' \
-                'WHERE PRIORITY_ID_BOARD = "' + self.trello_connection.board + '") AND '\
-                'LIST_ID_BOARD = "' + self.trello_connection.board + '"'
+                'WHERE PRIORITY_ID_BOARD = "' + self.trello_connection.board + '") AND ' \
+                                                                               'LIST_ID_BOARD = "' + self.trello_connection.board + '"'
 
         cursor = self.connection.cursor()
 
@@ -340,7 +357,8 @@ class MySQLConnection:
         for data in trello_cards_update:
             if data['id'] in sanitized_cards:
                 creation_date = self.get_card_create_date(data)
-                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                update_data = (data['name'], data['closed'], parser.parse(data['dateLastActivity']), data['idBoard'],
+                               data['pos'],
                                data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
                                data['idShort'],
                                data['due'], creation_date, self.execution_time, data['id'])
@@ -351,13 +369,14 @@ class MySQLConnection:
                         'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_CREATION_DATE= %s,CARD_LAST_MODIFIED = %s WHERE ' \
                         'CARD_ID = %s '
             else:
-                update_data = (data['name'], data['closed'], data['dateLastActivity'], data['idBoard'], data['pos'],
+                update_data = (data['name'], data['closed'], parser.parse(data['dateLastActivity']), data['idBoard'],
+                               data['pos'],
                                data['idList'], data['desc'], data['cover']['color'], data['isTemplate'],
                                data['idShort'],
                                data['due'], self.execution_time, data['id'])
                 query = 'UPDATE CARDS SET CARD_NAME = %s ,CARD_CLOSED = %s, ' \
                         'CARD_DATE_LAST_ACTIVITY = %s, CARD_ID_BOARD = %s,' \
-                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, '\
+                        'CARD_POS = %s, CARD_ID_LIST = %s, CARD_DESC = %s, CARD_COVER_COLOR = %s, ' \
                         'CARD_IS_TEMPLATE = %s, ' \
                         'CARD_ID_SHORT = %s, CARD_DUE = %s,CARD_LAST_MODIFIED = %s WHERE CARD_ID = %s'
             try:
@@ -475,13 +494,13 @@ class MySQLConnection:
                 print(e)
                 return 0
 
-    def execution_history(self):
+    def insert_execution_history(self):
         print('execution_history started at:', datetime.now())
         cursor = self.connection.cursor()
 
-        query = 'INSERT INTO EXECUTION_HISTORY (EH_DESCRIPTION, EH_CREATE_DATE) VALUES (%s, %s)'
+        query = 'INSERT INTO EXECUTION_HISTORY (EH_DESCRIPTION, EH_CREATE_DATE, EH_ID_BOARD) VALUES (%s, %s, %s)'
         try:
-            cursor.execute(query, ('DONE', self.execution_time))
+            cursor.execute(query, ('DONE', self.execution_time, self.trello_connection.board))
             self.connection.commit()
             return cursor.lastrowid
         except Error as e:
@@ -513,7 +532,8 @@ class MySQLConnection:
     def get_db_card_without_date(self):
         print('get_db_card_without_date started at:', datetime.now())
         cursor = self.connection.cursor()
-        query = 'SELECT CARD_ID FROM CARDS WHERE CARD_CREATION_DATE IS NULL'
+        query = "SELECT CARD_ID FROM CARDS WHERE CARD_CREATION_DATE IS NULL " \
+                "AND CARD_ID_BOARD = '" + self.trello_connection.board + "'"
         try:
             cursor.execute(query)
             response = cursor.fetchall()
@@ -573,7 +593,8 @@ class MySQLConnection:
         cursor = self.connection.cursor()
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
-                           data['listAfter'], data['type'], data['date'], data['cardPos'], data['oldPos'],
+                           data['listAfter'], data['type'], parser.parse(data['date']).date(), data['cardPos'],
+                           data['oldPos'],
                            data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
                            data['cardSource'], data['boardSource'], 'PYTHON')
             query = 'INSERT INTO ACTIONS ' \
@@ -606,4 +627,3 @@ class MySQLConnection:
 
     def close(self):
         self.connection.close()
-

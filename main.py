@@ -7,10 +7,9 @@ from db_connection_mysql import MySQLConnection
 
 
 def main(db_conn):
-
     print('Main Started at ', datetime.now())
 
-    execution_id = db_conn.execution_history()
+    execution_id = db_conn.insert_execution_history()
 
     db_conn.insert_lists()
     db_conn.update_lists()
@@ -45,7 +44,8 @@ def remove_cards_labels(trello):
 
 def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions Started at', datetime.now())
-    if datetime.today().isoweekday() == 1:
+    bypass = False
+    if datetime.today().isoweekday() == 1 or bypass == True:
 
         all_actions = trello_conn.get_all_board_actions_formatted()
         db_conn.insert_all_actions(all_actions)
@@ -54,16 +54,23 @@ def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions done at', datetime.now())
 
 
+def get_active_boards(conn):
+    boards = conn.get_active_boards()
+    sanitazed_boards = [x[0] for x in boards]
+    return sanitazed_boards
+
+
 if __name__ == '__main__':
     load_dotenv()
 
     trello_connection = TrelloConnection(os.getenv('TRELLO_API_KEY'))
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
-    trello_connection.set_board(os.getenv('TRELLO_API_BOARD'))
-
     mysql = MySQLConnection(trello_connection)
+    active_boards = get_active_boards(mysql)
+    if len(active_boards) > 0:
+        for board in active_boards:
+            trello_connection.set_board(board)
+            main(mysql)
     insert_all_board_actions(trello_connection, mysql)
-    main(mysql)
     remove_cards_labels(trello_connection)
     mysql.close()
-

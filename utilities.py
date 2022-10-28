@@ -101,7 +101,7 @@ def update_short_link(trello_connection, db_connection):
 
 def iso_date_to_standard(date):
     print(date)
-    formatted = datetime.strptime(date, "%Y-%m-%d").date()
+    formatted = datetime.strptime(date, "%Y-%m-%d ").date()
     return formatted
 
 
