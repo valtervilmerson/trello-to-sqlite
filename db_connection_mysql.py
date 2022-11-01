@@ -25,6 +25,12 @@ class MySQLConnection:
                                                 db=os.getenv('RAILWAY_MYSQL_DATABASE'),
                                                 host=os.getenv('RAILWAY_MYSQL_HOST'),
                                                 port=int(os.getenv('RAILWAY_MYSQL_PORT')))
+            else:
+                self.connection = mysql.connect(user=os.getenv('DEV_MYSQL_USER'),
+                                                passwd=os.getenv('DEV_MYSQL_PASSWORD'),
+                                                db=os.getenv('DEV_MYSQL_DATABASE'),
+                                                host=os.getenv('DEV_MYSQL_HOST'),
+                                                port=int(os.getenv('DEV_MYSQL_PORT')))
         except Error as e:
             print(e)
             return 0
