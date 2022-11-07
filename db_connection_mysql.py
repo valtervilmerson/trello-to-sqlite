@@ -234,7 +234,7 @@ class MySQLConnection:
                 'WHERE ' \
                 'LIST_ID NOT IN (SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER ' \
                 'WHERE PRIORITY_ID_BOARD = "' + self.trello_connection.board + '") AND ' \
-                                                                               'LIST_ID_BOARD = "' + self.trello_connection.board + '"'
+                "LIST_ID_BOARD = '" + self.trello_connection.board + "'"
 
         cursor = self.connection.cursor()
 

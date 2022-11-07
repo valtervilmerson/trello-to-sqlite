@@ -19,6 +19,7 @@ def main(db_conn):
     db_conn.update_cards()
     db_conn.close_cards()
 
+    # TODO fix collation for dev database
     db_conn.insert_cfd()
     db_conn.insert_cfd_priority_order()
     db_conn.delete_cfd_priority_order()
@@ -36,6 +37,7 @@ def main(db_conn):
 
 
 def remove_cards_labels(trello):
+    # TODO create a condition to check if the routine has already been executed on mondays
     if datetime.today().isoweekday() == 1:
         utilities.remove_cards_labels(trello)
     else:
@@ -71,6 +73,6 @@ if __name__ == '__main__':
         for board in active_boards:
             trello_connection.set_board(board)
             main(mysql)
-    insert_all_board_actions(trello_connection, mysql)
-    remove_cards_labels(trello_connection)
+            insert_all_board_actions(trello_connection, mysql)
+            remove_cards_labels(trello_connection)
     mysql.close()
