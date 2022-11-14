@@ -45,7 +45,7 @@ def remove_cards_labels(trello_connection):
     cards = trello_connection.get_cards_from_list(id_list)
 
     for card in cards:
-        if card['idList'] == id_list:
+        if label_id in card['idLabels']:
             trello_connection.delete_card_label(label_id, card['id'])
 
     print('Remove_labels completed at ', datetime.now())

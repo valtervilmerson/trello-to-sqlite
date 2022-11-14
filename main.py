@@ -68,6 +68,9 @@ if __name__ == '__main__':
     trello_connection = TrelloConnection(os.getenv('TRELLO_API_KEY'))
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     mysql = MySQLConnection(trello_connection)
+    trello_connection.set_board('62388d998a93181c0fe96d58')
+    remove_cards_labels(trello_connection)
+
     active_boards = get_active_boards(mysql)
     if len(active_boards) > 0:
         for board in active_boards:
