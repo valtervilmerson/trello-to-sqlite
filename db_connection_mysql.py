@@ -320,11 +320,11 @@ class MySQLConnection:
 
     def update_labels(self):
         print('update_labels started at:', datetime.now())
-        trello_labels_update = self.trello_connection.get_trello_labels()
+        trello_labels = self.trello_connection.get_trello_labels()
 
         update_cursor = self.connection.cursor()
 
-        for data in trello_labels_update:
+        for data in trello_labels:
             update_data = (data['idBoard'], data['name'], data['color'], self.execution_time, data['id'])
             query = 'UPDATE LABELS SET LABEL_ID_BOARD = %s ,LABEL_NAME = %s, LABEL_COLOR = %s, ' \
                     'LABEL_LAST_MODIFIED = %s WHERE LABEL_ID = %s'
@@ -411,8 +411,8 @@ class MySQLConnection:
                 return e
             counter = counter + 1
 
-    def update_labels(self):
-        print('update_labels started at:', datetime.now())
+    def close_labels(self):
+        print('close_labels started at:', datetime.now())
         db_labels_ids = self.get_db_labels_ids()
         trello_labels = self.trello_connection.get_trello_labels()
 

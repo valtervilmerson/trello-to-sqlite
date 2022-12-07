@@ -27,6 +27,7 @@ def main(db_conn):
 
     db_conn.insert_labels()
     db_conn.update_labels()
+    db_conn.close_labels()
 
     db_conn.insert_db_members()
 
@@ -46,7 +47,7 @@ def remove_cards_labels(trello):
 
 def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions Started at', datetime.now())
-    bypass = True
+    bypass = False
     if datetime.today().isoweekday() == 1 or bypass:
         all_actions_ids = trello_conn.get_all_board_actions_ids()
         exclusive_actions = db_conn.get_exclusive_actions(all_actions_ids)
