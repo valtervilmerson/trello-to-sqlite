@@ -65,7 +65,12 @@ class TrelloConnection(TrelloApi):
         members = self.trello_connection.boards.get_member(self.board)
         return members
 
-    def get_all_board_actions_formatted(self, limit=1000):
+    def get_action(self, action_id):
+        action = self.trello_connection.actions.get(action_id)
+        return action
+
+    def get_all_board_actions_formatted(self):
+        limit = 1000
         list_of_actions = ["updateCard", "copyCard", "createCard", "deleteCard", "moveCardToBoard"]
         action_id = ''
         formatted_board_actions = []
@@ -113,10 +118,11 @@ class TrelloConnection(TrelloApi):
                     print('num_execution reached 50')
                     break
             for item in board_actions:
+                trello_action = self.trello_connection.actions.get(item['id'])
                 for key in default_dict:
                     splitted_values = default_dict[key].split('.')
-                    if splitted_values[0] in item:
-                        action_list.append(item[splitted_values[0]])
+                    if splitted_values[0] in trello_action:
+                        action_list.append(trello_action[splitted_values[0]])
                     else:
                         action_object[key] = None
                         continue
@@ -131,5 +137,83 @@ class TrelloConnection(TrelloApi):
                     action_list = []
                 formatted_board_actions.append(action_object)
                 action_object = {}
+        print('Total actions from board: {}'.format(len(formatted_board_actions)))
+        return formatted_board_actions
+
+    def get_all_board_actions_ids(self):
+        limit = 1000
+        list_of_actions = ["updateCard", "copyCard", "createCard", "deleteCard", "moveCardToBoard"]
+        action_id = ''
+        board_actions = []
+        actions_ids = []
+
+        for action in list_of_actions:
+            response_is_empty = False
+            num_execution = 0
+
+            while not response_is_empty:
+                if num_execution == 0:
+                    actions = self.trello_connection.boards.get_action(self.board, filter=action, limit=limit)
+                    board_actions = board_actions + actions
+                elif num_execution > 0:
+                    actions = self.trello_connection.boards.get_action(self.board, filter=action, limit=limit,
+                                                                       before=action_id)
+                    board_actions = board_actions + actions
+                num_execution = num_execution + 1
+                if len(actions) == 0:
+                    response_is_empty = True
+                elif len(actions) > 0:
+                    action_id = actions[-1]['id']
+                if num_execution == 50:
+                    print('num_execution reached 50')
+                    break
+        for action in board_actions:
+            actions_ids.append(action['id'])
+        return actions_ids
+
+    def get_board_actions_formatted(self, actions_ids):
+        formatted_board_actions = []
+        action_list = []
+        action_object = {}
+        interface = {
+            "id": "id",
+            "idMemberCreator": "idMemberCreator",
+            "cardId": "data.card.id",
+            "boardId": "data.board.id",
+            "listBefore": "data.listBefore.id",
+            "listAfter": "data.listAfter.id",
+            "type": "type",
+            "date": "date",
+            "cardPos": "data.card.pos",
+            "oldPos": "data.old.pos",
+            "listId": "data.list.id",
+            "appCreator": "appCreator.name",
+            "translationKey": "display.translationKey",
+            "labelId": "data.label.id",
+            "cardSource": "data.cardSource.id",
+            "boardSource": "data.boardSource.id"
+        }
+        default_dict = interface
+
+        for item in actions_ids:
+            trello_action = self.trello_connection.actions.get(item)
+            for key in default_dict:
+                splitted_values = default_dict[key].split('.')
+                if splitted_values[0] in trello_action:
+                    action_list.append(trello_action[splitted_values[0]])
+                else:
+                    action_object[key] = None
+                    continue
+                for index, value in enumerate(splitted_values):
+                    if index > 0:
+                        if action_list[0] is not None:
+                            if value in action_list[0]:
+                                action_list[0] = action_list[0][value]
+                            else:
+                                action_list[0] = None
+                action_object[key] = action_list[0]
+                action_list = []
+            formatted_board_actions.append(action_object)
+            action_object = {}
         print('Total actions from board: {}'.format(len(formatted_board_actions)))
         return formatted_board_actions

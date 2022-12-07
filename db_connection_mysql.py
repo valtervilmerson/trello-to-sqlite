@@ -631,5 +631,42 @@ class MySQLConnection:
             print(e)
             return 0
 
+    def get_exclusive_actions(self, actions):
+        print('get_exclusive_actions started at:', datetime.now())
+
+        trello_actions = actions
+
+        db_actions_ids = self.get_db_board_actions_ids()
+
+        sanitized_db_actions_ids = [x[0] for x in db_actions_ids]
+        exclusive_actions = [x for x in trello_actions if x not in sanitized_db_actions_ids]
+        return exclusive_actions
+
+    def insert_exclusive_actions(self, exclusive_actions):
+        print('insert_exclusive_actions started at:', datetime.now())
+        inserted_rows = []
+        cursor = self.connection.cursor()
+        for data in exclusive_actions:
+            insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
+                           data['listAfter'], data['type'], parser.parse(data['date']).date(), data['cardPos'],
+                           data['oldPos'],
+                           data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
+                           data['cardSource'], data['boardSource'], 'PYTHON')
+            query = 'INSERT INTO ACTIONS ' \
+                    '(ACTION_ID, ACTION_ID_MEMBER_CREATOR ,ACTION_CARD_ID, ACTION_BOARD_ID,' \
+                    'ACTION_LIST_BEFORE, ACTION_LIST_AFTER, ACTION_TYPE, ACTION_DATE, ACTION_CARD_POS,' \
+                    'ACTION_OLD_POS, ACTION_LIST_ID, ACTION_APP_CREATOR, ACTION_TRANSLATION_KEY, ' \
+                    'ACTION_LABEL_ID, ACTION_CARD_SOURCE, ACTION_BOARD_SOURCE, ACTION_INSERT_SOURCE)' \
+                    'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            try:
+                cursor.execute(query, insert_data)
+                self.connection.commit()
+                inserted_rows.append(cursor.lastrowid)
+            except Error as e:
+                print(e)
+                return e
+        print("{} actions were inserted".format(len(inserted_rows)))
+        return inserted_rows
+
     def close(self):
         self.connection.close()

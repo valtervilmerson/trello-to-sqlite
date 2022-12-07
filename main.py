@@ -46,11 +46,13 @@ def remove_cards_labels(trello):
 
 def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions Started at', datetime.now())
-    bypass = False
-    if datetime.today().isoweekday() == 1 or bypass == True:
-
-        all_actions = trello_conn.get_all_board_actions_formatted()
-        db_conn.insert_all_actions(all_actions)
+    bypass = True
+    if datetime.today().isoweekday() == 1 or bypass:
+        all_actions_ids = trello_conn.get_all_board_actions_ids()
+        exclusive_actions = db_conn.get_exclusive_actions(all_actions_ids)
+        if len(exclusive_actions) > 0:
+            formatted_board_actions = trello_conn.get_board_actions_formatted(exclusive_actions)
+            db_conn.insert_exclusive_actions(formatted_board_actions)
     else:
         print('insert_all_board_actions é executado apenas nas segundas-feiras')
     print('insert_all_board_actions done at', datetime.now())
@@ -58,8 +60,8 @@ def insert_all_board_actions(trello_conn, db_conn):
 
 def get_active_boards(conn):
     boards = conn.get_active_boards()
-    sanitazed_boards = [x[0] for x in boards]
-    return sanitazed_boards
+    sanitized_boards = [x[0] for x in boards]
+    return sanitized_boards
 
 
 if __name__ == '__main__':
@@ -68,8 +70,6 @@ if __name__ == '__main__':
     trello_connection = TrelloConnection(os.getenv('TRELLO_API_KEY'))
     trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
     mysql = MySQLConnection(trello_connection)
-    trello_connection.set_board('62388d998a93181c0fe96d58')
-    remove_cards_labels(trello_connection)
 
     active_boards = get_active_boards(mysql)
     if len(active_boards) > 0:
