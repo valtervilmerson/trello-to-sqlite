@@ -49,11 +49,13 @@ def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions Started at', datetime.now())
     bypass = False
     if datetime.today().isoweekday() == 1 or bypass:
-        all_actions_ids = trello_conn.get_all_board_actions_ids()
+        all_actions = trello_conn.get_all_board_actions_formatted()
+        all_actions_ids = [actionId['id'] for actionId in all_actions]
+
         exclusive_actions = db_conn.get_exclusive_actions(all_actions_ids)
         if len(exclusive_actions) > 0:
-            formatted_board_actions = trello_conn.get_board_actions_formatted(exclusive_actions)
-            db_conn.insert_exclusive_actions(formatted_board_actions)
+            exclusive = [x for x in all_actions if x['id'] in exclusive_actions]
+            db_conn.insert_exclusive_actions(exclusive)
     else:
         print('insert_all_board_actions é executado apenas nas segundas-feiras')
     print('insert_all_board_actions done at', datetime.now())
@@ -76,9 +78,7 @@ if __name__ == '__main__':
     if len(active_boards) > 0:
         for board in active_boards:
             trello_connection.set_board(board)
-            a = trello_connection.get_all_board_actions_formatted()
-            print(a)
-            # main(mysql)
-            # insert_all_board_actions(trello_connection, mysql)
-            # remove_cards_labels(trello_connection)
+            main(mysql)
+            insert_all_board_actions(trello_connection, mysql)
+            remove_cards_labels(trello_connection)
     mysql.close()

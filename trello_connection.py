@@ -134,18 +134,18 @@ class TrelloConnection(TrelloApi):
                     action_list = []
                 if trello_action['type'] == 'updateCard':
                     old = trello_action['data']['old']
-                    oldKey = old.keys()
-                    if 'closed' in oldKey:
+                    old_key = old.keys()
+                    if 'closed' in old_key:
                         if old['closed']:
                             action_object['translationKey'] = 'action_sent_card_to_board'
                         else:
                             action_object['translationKey'] = 'action_archived_card'
-                    elif 'idList' in oldKey:
+                    elif 'idList' in old_key:
                         action_object['translationKey'] = 'action_move_card_from_list_to_list'
-                    elif 'pos' in oldKey:
-                        currentPos = trello_action['data']['card']['pos']
-                        oldPos = old['pos']
-                        if currentPos > oldPos:
+                    elif 'pos' in old_key:
+                        current_pos = trello_action['data']['card']['pos']
+                        old_pos = old['pos']
+                        if current_pos > old_pos:
                             action_object['translationKey'] = 'action_moved_card_higher'
                         else:
                             action_object['translationKey'] = 'action_moved_card_lower'
