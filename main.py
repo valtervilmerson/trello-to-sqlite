@@ -76,7 +76,9 @@ if __name__ == '__main__':
     if len(active_boards) > 0:
         for board in active_boards:
             trello_connection.set_board(board)
-            main(mysql)
-            insert_all_board_actions(trello_connection, mysql)
-            remove_cards_labels(trello_connection)
+            a = trello_connection.get_all_board_actions_formatted()
+            print(a)
+            # main(mysql)
+            # insert_all_board_actions(trello_connection, mysql)
+            # remove_cards_labels(trello_connection)
     mysql.close()

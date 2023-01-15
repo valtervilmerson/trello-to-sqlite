@@ -88,7 +88,7 @@ class TrelloConnection(TrelloApi):
             "cardPos": "data.card.pos",
             "oldPos": "data.old.pos",
             "listId": "data.list.id",
-            "appCreator": "appCreator.name",
+            "appCreator": "appCreator.id",
             "translationKey": "display.translationKey",
             "labelId": "data.label.id",
             "cardSource": "data.cardSource.id",
@@ -114,11 +114,8 @@ class TrelloConnection(TrelloApi):
                     response_is_empty = True
                 elif len(actions) > 0:
                     action_id = actions[-1]['id']
-                if num_execution == 50:
-                    print('num_execution reached 50')
-                    break
-            for item in board_actions:
-                trello_action = self.trello_connection.actions.get(item['id'])
+
+            for trello_action in board_actions:
                 for key in default_dict:
                     splitted_values = default_dict[key].split('.')
                     if splitted_values[0] in trello_action:
@@ -135,6 +132,32 @@ class TrelloConnection(TrelloApi):
                                     action_list[0] = None
                     action_object[key] = action_list[0]
                     action_list = []
+                if trello_action['type'] == 'updateCard':
+                    old = trello_action['data']['old']
+                    oldKey = old.keys()
+                    if 'closed' in oldKey:
+                        if old['closed']:
+                            action_object['translationKey'] = 'action_sent_card_to_board'
+                        else:
+                            action_object['translationKey'] = 'action_archived_card'
+                    elif 'idList' in oldKey:
+                        action_object['translationKey'] = 'action_move_card_from_list_to_list'
+                    elif 'pos' in oldKey:
+                        currentPos = trello_action['data']['card']['pos']
+                        oldPos = old['pos']
+                        if currentPos > oldPos:
+                            action_object['translationKey'] = 'action_moved_card_higher'
+                        else:
+                            action_object['translationKey'] = 'action_moved_card_lower'
+                elif trello_action['type'] == 'copyCard':
+                    action_object['translationKey'] = 'action_copy_card'
+                elif trello_action['type'] == 'createCard':
+                    action_object['translationKey'] = 'action_create_card'
+                elif trello_action['type'] == 'deleteCard':
+                    action_object['translationKey'] = 'action_delete_card'
+                elif trello_action['type'] == 'moveCardToBoard':
+                    action_object['translationKey'] = 'action_move_card_to_board'
+
                 formatted_board_actions.append(action_object)
                 action_object = {}
         print('Total actions from board: {}'.format(len(formatted_board_actions)))
