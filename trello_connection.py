@@ -149,6 +149,19 @@ class TrelloConnection(TrelloApi):
                             action_object['translationKey'] = 'action_moved_card_higher'
                         else:
                             action_object['translationKey'] = 'action_moved_card_lower'
+                    # TODO add and remove label actions must be unique on the board. The webhook already receives this
+                    #  actions by a different action id. The action date must be checked before insert
+                    # elif 'idLabels' in old_key:
+                    #     old_labels_total = len(old['idLabels'])
+                    #     current_labels_total = len(trello_action['data']['card']['idLabels'])
+                    #     if old_labels_total > current_labels_total:
+                    #         action_object['translationKey'] = 'action_remove_label_from_card'
+                    #         action_object['labelId'] = [x for x in old['idLabels'] if x
+                    #                                     not in trello_action['data']['card']['idLabels']][0]
+                    #     else:
+                    #         action_object['translationKey'] = 'action_add_label_to_card'
+                    #         action_object['labelId'] = [x for x in trello_action['data']['card']['idLabels'] if x
+                    #                                     not in old['idLabels']][0]
                 elif trello_action['type'] == 'copyCard':
                     action_object['translationKey'] = 'action_copy_card'
                 elif trello_action['type'] == 'createCard':
@@ -158,7 +171,8 @@ class TrelloConnection(TrelloApi):
                 elif trello_action['type'] == 'moveCardToBoard':
                     action_object['translationKey'] = 'action_move_card_to_board'
 
-                formatted_board_actions.append(action_object)
+                if action_object['translationKey'] is not None:
+                    formatted_board_actions.append(action_object)
                 action_object = {}
         print('Total actions from board: {}'.format(len(formatted_board_actions)))
         return formatted_board_actions

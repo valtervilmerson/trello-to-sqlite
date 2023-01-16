@@ -5,6 +5,7 @@ import os
 from dateutil import parser
 from dotenv import load_dotenv
 
+
 load_dotenv()
 environment = os.getenv('APP_ENVIRONMENT')
 
@@ -599,7 +600,9 @@ class MySQLConnection:
         cursor = self.connection.cursor()
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
-                           data['listAfter'], data['type'], str(parser.parse(data['date'])), data['cardPos'],
+                           data['listAfter'],
+                           data['type'], parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour-3),
+                           data['cardPos'],
                            data['oldPos'],
                            data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
                            data['cardSource'], data['boardSource'], 'PYTHON')
@@ -648,7 +651,8 @@ class MySQLConnection:
         cursor = self.connection.cursor()
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
-                           data['listAfter'], data['type'], str(parser.parse(data['date'])), data['cardPos'],
+                           data['listAfter'], data['type'],
+                           parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour-3), data['cardPos'],
                            data['oldPos'],
                            data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
                            data['cardSource'], data['boardSource'], 'PYTHON')
@@ -659,6 +663,7 @@ class MySQLConnection:
                     'ACTION_LABEL_ID, ACTION_CARD_SOURCE, ACTION_BOARD_SOURCE, ACTION_INSERT_SOURCE)' \
                     'VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
             try:
+                print(insert_data)
                 cursor.execute(query, insert_data)
                 self.connection.commit()
                 inserted_rows.append(cursor.lastrowid)

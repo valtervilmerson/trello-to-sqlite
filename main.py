@@ -47,11 +47,10 @@ def remove_cards_labels(trello):
 
 def insert_all_board_actions(trello_conn, db_conn):
     print('insert_all_board_actions Started at', datetime.now())
-    bypass = False
+    bypass = True
     if datetime.today().isoweekday() == 1 or bypass:
         all_actions = trello_conn.get_all_board_actions_formatted()
         all_actions_ids = [actionId['id'] for actionId in all_actions]
-
         exclusive_actions = db_conn.get_exclusive_actions(all_actions_ids)
         if len(exclusive_actions) > 0:
             exclusive = [x for x in all_actions if x['id'] in exclusive_actions]
