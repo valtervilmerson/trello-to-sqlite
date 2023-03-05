@@ -1,9 +1,17 @@
-import os
-from dotenv import load_dotenv
 from trello_connection import TrelloConnection
 from datetime import datetime
 import utilities
 from db_connection_mysql import MySQLConnection
+from configuration.common import ConfigurationBuilder
+from configuration.toml import TOMLFile
+from configuration.env import EnvVars
+
+builder = ConfigurationBuilder(
+    TOMLFile("settings.toml"),
+    EnvVars(prefix="APP_")
+)
+
+config = builder.build()
 
 
 def main(db_conn):
@@ -67,11 +75,11 @@ def get_active_boards(conn):
 
 
 if __name__ == '__main__':
-    load_dotenv()
 
-    trello_connection = TrelloConnection(os.getenv('TRELLO_API_KEY'))
-    trello_connection.set_api_token(os.getenv('TRELLO_API_TOKEN'))
-    mysql = MySQLConnection(trello_connection)
+    trello_connection = TrelloConnection(config.trello.TRELLO_API_KEY)
+    trello_connection.set_api_token(config.trello.TRELLO_API_TOKEN)
+
+    mysql = MySQLConnection(trello_connection, config)
 
     active_boards = get_active_boards(mysql)
     if len(active_boards) > 0:

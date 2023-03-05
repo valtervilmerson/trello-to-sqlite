@@ -1,37 +1,28 @@
-import MySQLdb as mysql
-from MySQLdb import Error
+import pymysql as mysql
+from pymysql import Error
 from datetime import datetime
-import os
 from dateutil import parser
-from dotenv import load_dotenv
-
-
-load_dotenv()
-environment = os.getenv('APP_ENVIRONMENT')
 
 
 class MySQLConnection:
 
-    def __init__(self, trello_conn):
+    def __init__(self, trello_conn, config):
         self.connection = None
         self.execution_time = datetime.now()
         self.trello_connection = trello_conn
+        self.config = config
+        self.environment = config.environment.ENV
         try:
-            if environment == 'production':
-                self.connection = mysql.connect(user=os.getenv('MYSQL_USER'), passwd=os.getenv('MYSQL_PASSWORD'),
-                                                db=os.getenv('MYSQL_DATABASE'), host=os.getenv('MYSQL_HOST'))
-            elif environment == 'railway-development':
-                self.connection = mysql.connect(user=os.getenv('RAILWAY_MYSQL_USER'),
-                                                passwd=os.getenv('RAILWAY_MYSQL_PASSWORD'),
-                                                db=os.getenv('RAILWAY_MYSQL_DATABASE'),
-                                                host=os.getenv('RAILWAY_MYSQL_HOST'),
-                                                port=int(os.getenv('RAILWAY_MYSQL_PORT')))
+            if self.environment == 'production':
+                self.connection = mysql.connect(user=config.database.MYSQL_USER, passwd=config.database.MYSQL_PASSWORD,
+                                                db=config.database.MYSQL_USER, host=config.database.MYSQL_USER)
             else:
-                self.connection = mysql.connect(user=os.getenv('DEV_MYSQL_USER'),
-                                                passwd=os.getenv('DEV_MYSQL_PASSWORD'),
-                                                db=os.getenv('DEV_MYSQL_DATABASE'),
-                                                host=os.getenv('DEV_MYSQL_HOST'),
-                                                port=int(os.getenv('DEV_MYSQL_PORT')))
+                self.connection = mysql.connect(user=config.database.DEV_MYSQL_USER,
+                                                passwd=config.database.DEV_MYSQL_PASSWORD,
+                                                db=config.database.DEV_MYSQL_DATABASE,
+                                                host=config.database.DEV_MYSQL_HOST,
+                                                port=config.database.DEV_MYSQL_PORT
+                                                )
         except Error as e:
             print(e)
             return 0

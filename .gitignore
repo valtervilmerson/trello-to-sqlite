@@ -130,3 +130,9 @@ dmypy.json
 
 # Jet Brains
 .idea
+
+#settings
+settings.toml
+
+#others
+trello-techsallus-env/

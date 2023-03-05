@@ -1,7 +1,5 @@
 from create_json import WriteJson
 from datetime import datetime
-import pandas as pd
-import numpy as np
 
 
 def update_cards_list(trello_connection):
@@ -57,20 +55,6 @@ def create_json(trello_connection):
     WriteJson.write("teste", actions)
 
 
-def pandas(conn):
-    query = 'SELECT LABEL_NAME, LABEL_ID FROM LABELS'
-    result = pd.read_sql_query(query, conn)
-    print(result)
-
-
-def numpy():
-    a = []
-    for e in 'Teste':
-        a.append(e)
-    r = np.diag(a)
-    print(r)
-
-
 def fix(trello_connection):
     label_id = '62695479d0676034bae7fdf8'
     id_list = '62388db5b91b032488cea097'
@@ -96,7 +80,6 @@ def update_short_link(trello_connection, db_connection):
         except:
             print("errooou")
     db_connection.connection.commit()
-
 
 
 def iso_date_to_standard(date):

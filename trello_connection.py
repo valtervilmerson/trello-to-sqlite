@@ -236,8 +236,7 @@ class TrelloConnection(TrelloApi):
             trello_action = self.trello_connection.actions.get(item)
             for key in default_dict:
                 splitted_values = default_dict[key].split('.')
-                if splitted_values[0] in trello_action:
-                    action_list.append(trello_action[splitted_values[0]])
+                if splitted_values[0] in trello_action:                    action_list.append(trello_action[splitted_values[0]])
                 else:
                     action_object[key] = None
                     continue
