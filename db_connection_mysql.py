@@ -15,7 +15,7 @@ class MySQLConnection:
         try:
             if self.environment == 'production':
                 self.connection = mysql.connect(user=config.database.MYSQL_USER, passwd=config.database.MYSQL_PASSWORD,
-                                                db=config.database.MYSQL_USER, host=config.database.MYSQL_USER)
+                                                db=config.database.MYSQL_DATABASE, host=config.database.MYSQL_HOST)
             else:
                 self.connection = mysql.connect(user=config.database.DEV_MYSQL_USER,
                                                 passwd=config.database.DEV_MYSQL_PASSWORD,
@@ -288,8 +288,11 @@ class MySQLConnection:
         labels = []
 
         trello_cards = self.trello_connection.get_trello_cards()
+        done_list = self.get_board_done_list()
+        done_list = done_list[0]
+        cards_not_on_done_list = [x for x in trello_cards if x['idList'] not in done_list]
 
-        for card in trello_cards:
+        for card in cards_not_on_done_list:
             if len(card['idLabels']) > 0:
                 for label_id in card['idLabels']:
                     labels.append((card['id'], label_id, card['idBoard']))
@@ -463,17 +466,36 @@ class MySQLConnection:
                 print(e)
                 return 0
 
+    def get_board_done_list(self):
+        print('get_board_done_list started at:', datetime.now())
+        query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneList' " \
+                "AND RULES_ID_BOARD = '" + self.trello_connection.board + "' LIMIT 1"
+        cursor = self.connection.cursor()
+
+        try:
+            cursor.execute(query)
+            db_cfd_list = cursor.fetchall()
+            return db_cfd_list
+        except Error as e:
+            print(e)
+            return 0
+
     def insert_board_state(self, execution_id):
         print('insert_board_state started at:', datetime.now())
         trello_cards = self.trello_connection.get_trello_cards()
         trello_lists = self.trello_connection.get_trello_lists()
+        done_list = self.get_board_done_list()
+        done_list = done_list[0]
+        cards_not_on_done_list = [x for x in trello_cards if x['idList'] not in done_list]
         lists_pos = []
+
         for list in trello_lists:
             lists_pos.append([list['id'], list['pos']])
 
         cursor = self.connection.cursor()
         list_pos = 0
-        for card in trello_cards:
+
+        for card in cards_not_on_done_list:
             for pos in lists_pos:
                 if pos[0] == card['idList']:
                     list_pos = pos[1]
