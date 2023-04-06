@@ -514,6 +514,55 @@ class MySQLConnection:
                 print(e)
                 return 0
 
+    def insert_done_list(self):
+        print('insert_done_list started at:', datetime.now())
+        trello_cards = self.trello_connection.get_trello_cards()
+        done_list = self.get_board_done_list()
+        done_list = done_list[0]
+        cards_on_done_list = [x for x in trello_cards if x['idList'] in done_list]
+        done_list = done_list[0]
+        cards_already_done = self.get_done_list(done_list)
+        cards_already_done = [x[2] for x in cards_already_done]
+        print(cards_already_done)
+
+
+        for card in cards_on_done_list:
+            for label in card['idLabels']:
+                print(label)
+            break
+
+        # cursor = self.connection.cursor()
+        #
+        # for card in cards_on_done_list:
+        #     print(card)
+        #     if card['idLabels']:
+        #         'a'
+        #
+        #     query = 'INSERT INTO BOARD_STATE (BS_BOARD_ID, BS_LIST_ID, BS_CARD_ID, BS_CREATE_DATE, BS_STATE_ID, ' \
+        #             'BS_CARD_POS, BS_LIST_POS) ' \
+        #             'VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        #
+        #     board_state_data = (card['idBoard'], card['idList'], card['id'], self.execution_time)
+        #
+        #     try:
+        #         cursor.execute(query, board_state_data)
+        #         self.connection.commit()
+        #     except Error as e:
+        #         print(e)
+        #         return 0
+
+    def get_done_list(self, done_list):
+        print('get_done_list started at:', datetime.now())
+        cursor = self.connection.cursor()
+        query = "SELECT DL_BOARD_ID, DL_LIST_ID, DL_CARD_ID ,DL_LABEL_ID FROM DONE_LIST WHERE " \
+                "DL_BOARD_ID = '" + self.trello_connection.board + "' AND DL_LIST_ID = '" + done_list + "'"
+        try:
+            cursor.execute(query)
+            response = cursor.fetchall()
+            return response
+        except Error as e:
+            return 0
+
     def insert_execution_history(self):
         print('execution_history started at:', datetime.now())
         cursor = self.connection.cursor()
