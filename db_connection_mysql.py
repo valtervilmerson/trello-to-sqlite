@@ -226,7 +226,7 @@ class MySQLConnection:
                 'WHERE ' \
                 'LIST_ID NOT IN (SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER ' \
                 'WHERE PRIORITY_ID_BOARD = "' + self.trello_connection.board + '") AND ' \
-                "LIST_ID_BOARD = '" + self.trello_connection.board + "'"
+                                                                               "LIST_ID_BOARD = '" + self.trello_connection.board + "'"
 
         cursor = self.connection.cursor()
 
@@ -514,43 +514,6 @@ class MySQLConnection:
                 print(e)
                 return 0
 
-    def insert_done_list(self):
-        print('insert_done_list started at:', datetime.now())
-        trello_cards = self.trello_connection.get_trello_cards()
-        done_list = self.get_board_done_list()
-        done_list = done_list[0]
-        cards_on_done_list = [x for x in trello_cards if x['idList'] in done_list]
-        done_list = done_list[0]
-        cards_already_done = self.get_done_list(done_list)
-        cards_already_done = [x[2] for x in cards_already_done]
-        print(cards_already_done)
-
-
-        for card in cards_on_done_list:
-            for label in card['idLabels']:
-                print(label)
-            break
-
-        # cursor = self.connection.cursor()
-        #
-        # for card in cards_on_done_list:
-        #     print(card)
-        #     if card['idLabels']:
-        #         'a'
-        #
-        #     query = 'INSERT INTO BOARD_STATE (BS_BOARD_ID, BS_LIST_ID, BS_CARD_ID, BS_CREATE_DATE, BS_STATE_ID, ' \
-        #             'BS_CARD_POS, BS_LIST_POS) ' \
-        #             'VALUES (%s, %s, %s, %s, %s, %s, %s)'
-        #
-        #     board_state_data = (card['idBoard'], card['idList'], card['id'], self.execution_time)
-        #
-        #     try:
-        #         cursor.execute(query, board_state_data)
-        #         self.connection.commit()
-        #     except Error as e:
-        #         print(e)
-        #         return 0
-
     def get_done_list(self, done_list):
         print('get_done_list started at:', datetime.now())
         cursor = self.connection.cursor()
@@ -562,6 +525,31 @@ class MySQLConnection:
             return response
         except Error as e:
             return 0
+
+    def insert_done_list(self):
+        print('insert_done_list started at:', datetime.now())
+        trello_cards = self.trello_connection.get_trello_cards()
+        done_list = self.get_board_done_list()
+        done_list = done_list[0]
+        cards_on_done_list = [x for x in trello_cards if x['idList'] in done_list]
+        cards_already_done = self.get_done_list(done_list)
+        cards_already_done = [x[2] for x in cards_already_done]
+        new_cards = [x for x in cards_on_done_list if x['id'] not in cards_already_done]
+        cursor = self.connection.cursor()
+        for card in new_cards:
+            for label in card['idLabels']:
+                done_list_data = (card['idBoard'], card['idList'], card['id'], label, self.execution_time,
+                                  self.execution_time)
+
+                query = 'INSERT INTO DONE_LIST (DL_BOARD_ID, DL_LIST_ID, DL_CARD_ID, DL_LABEL_ID,DL_INSERTED_AT, ' \
+                        'DL_UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s)'
+
+                try:
+                    cursor.execute(query, done_list_data)
+                    self.connection.commit()
+                except Error as e:
+                    print(e)
+                    return 0
 
     def insert_execution_history(self):
         print('execution_history started at:', datetime.now())
@@ -663,7 +651,7 @@ class MySQLConnection:
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
                            data['listAfter'],
-                           data['type'], parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour-3),
+                           data['type'], parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour - 3),
                            data['cardPos'],
                            data['oldPos'],
                            data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
@@ -714,7 +702,8 @@ class MySQLConnection:
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
                            data['listAfter'], data['type'],
-                           parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour-3), data['cardPos'],
+                           parser.parse(data['date']).replace(hour=parser.parse(data['date']).hour - 3),
+                           data['cardPos'],
                            data['oldPos'],
                            data['listId'], data['appCreator'], data['translationKey'], data['labelId'],
                            data['cardSource'], data['boardSource'], 'PYTHON')

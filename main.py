@@ -42,6 +42,8 @@ def main(db_conn):
     db_conn.insert_cards_labels(execution_id)
     db_conn.insert_board_state(execution_id)
 
+    db_conn.insert_done_list()
+
     print('Main Completed at ', datetime.now())
 
 
@@ -85,8 +87,7 @@ if __name__ == '__main__':
     if len(active_boards) > 0:
         for board in active_boards:
             trello_connection.set_board(board)
-            mysql.insert_done_list()
-            # main(mysql)
-            # insert_all_board_actions(trello_connection, mysql)
-            # remove_cards_labels(trello_connection)
+            main(mysql)
+            insert_all_board_actions(trello_connection, mysql)
+            remove_cards_labels(trello_connection)
     mysql.close()
