@@ -40,6 +40,7 @@ def main(db_conn):
     db_conn.insert_db_members()
 
     db_conn.insert_cards_labels(execution_id)
+    db_conn.insert_cards_members(execution_id)
     db_conn.insert_board_state(execution_id)
 
     db_conn.insert_done_list()

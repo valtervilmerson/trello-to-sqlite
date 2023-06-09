@@ -313,6 +313,36 @@ class MySQLConnection:
                 return e
         return inserted_rows
 
+    def insert_cards_members(self, execution_id):
+        print('insert_cards_members started at:', datetime.now())
+        inserted_rows = []
+        members = []
+
+        trello_cards = self.trello_connection.get_trello_cards()
+        done_list = self.get_board_done_list()
+        done_list = done_list[0]
+        cards_not_on_done_list = [x for x in trello_cards if x['idList'] not in done_list]
+
+        for card in cards_not_on_done_list:
+            if len(card['idMembers']) > 0:
+                for member in card['idMembers']:
+                    members.append((card['idBoard'], card['id'], member))
+        cursor = self.connection.cursor()
+
+        for member in members:
+            query = 'INSERT INTO CARDS_MEMBERS (CM_BOARD_ID, CM_CARD_ID, CM_MEMBER_ID, CM_STATE_ID, ' \
+                    'CM_INSERTED_AT, CM_UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s)'
+            insert_data = (member[0], member[1], member[2], execution_id, self.execution_time,
+                           self.execution_time)
+            try:
+                cursor.execute(query, insert_data)
+                self.connection.commit()
+                inserted_rows.append(cursor.lastrowid)
+            except Error as e:
+                print(e)
+                return e
+        return inserted_rows
+
     def update_labels(self):
         print('update_labels started at:', datetime.now())
         trello_labels = self.trello_connection.get_trello_labels()
