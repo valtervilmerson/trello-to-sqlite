@@ -1,5 +1,6 @@
 from create_json import WriteJson
 from datetime import datetime
+from pymysql import Error
 
 
 def update_cards_list(trello_connection):
@@ -33,18 +34,35 @@ def move_cards_list(trello_connection):
     print('Move_card_list completed in ', datetime.now())
 
 
-def remove_cards_labels(trello_connection):
-
+def remove_cards_labels(trello_connection, db_conn, board_id):
     print('Remove_labels started at ', datetime.now())
 
-    label_id = '626bbaf4ab76f467e0893a4e'
-    id_list = '62388db5b91b032488cea097'
+    list_id_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneList' AND" \
+            " RULES_ID_BOARD = '" + board_id + "'"
 
-    cards = trello_connection.get_cards_from_list(id_list)
+    label_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneLabel' AND" \
+            " RULES_ID_BOARD = '" + board_id + "'"
 
-    for card in cards:
-        if label_id in card['idLabels']:
-            trello_connection.delete_card_label(label_id, card['id'])
+    cursor = db_conn.connection.cursor()
+    try:
+        cursor.execute(list_id_query)
+        list_id = cursor.fetchall()
+        cursor.execute(label_query)
+        label_id = cursor.fetchall()
+        print(list_id)
+        if len(list_id) > 0:
+            cards = trello_connection.get_cards_from_list(list_id[0][0])
+            if len(cards) > 0 and len(label_id) > 0 and len(list_id) > 0:
+                for card in cards:
+                    if label_id in card['idLabels']:
+                        trello_connection.delete_card_label(label_id, card['id'])
+
+    except Error as e:
+        print(e)
+        return 0
+
+
+
 
     print('Remove_labels completed at ', datetime.now())
 
@@ -86,5 +104,3 @@ def iso_date_to_standard(date):
     print(date)
     formatted = datetime.strptime(date, "%Y-%m-%d ").date()
     return formatted
-
-

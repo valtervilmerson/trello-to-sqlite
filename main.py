@@ -48,10 +48,10 @@ def main(db_conn):
     print('Main Completed at ', datetime.now())
 
 
-def remove_cards_labels(trello, bypass=False):
+def remove_cards_labels(trello, db_conn, board_id,bypass=False):
     # TODO create a condition to check if the routine has already been executed on mondays
     if datetime.today().isoweekday() == 1 or bypass:
-        utilities.remove_cards_labels(trello)
+        utilities.remove_cards_labels(trello, db_conn, board_id)
     else:
         print('Remove_cards_labels é executado apenas nas segundas-feiras')
 
@@ -90,5 +90,5 @@ if __name__ == '__main__':
             trello_connection.set_board(board)
             main(mysql)
             insert_all_board_actions(trello_connection, mysql)
-            remove_cards_labels(trello_connection)
+            remove_cards_labels(trello_connection, mysql, board)
     mysql.close()
