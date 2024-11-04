@@ -49,10 +49,11 @@ def remove_cards_labels(trello_connection, db_conn, board_id):
         list_id = cursor.fetchall()
         cursor.execute(label_query)
         label_id = cursor.fetchall()
-        print(list_id)
+
         if len(list_id) > 0:
             cards = trello_connection.get_cards_from_list(list_id[0][0])
-            if len(cards) > 0 and len(label_id) > 0 and len(list_id) > 0:
+            if len(cards) > 0 and len(label_id) > 0:
+                label_id = label_id[0][0]
                 for card in cards:
                     if label_id in card['idLabels']:
                         trello_connection.delete_card_label(label_id, card['id'])

@@ -7,7 +7,7 @@ from configuration.toml import TOMLFile
 from configuration.env import EnvVars
 
 builder = ConfigurationBuilder(
-    TOMLFile("settings.toml"),
+    TOMLFile("C:/trello-techsallus/settings.toml"),
     EnvVars(prefix="APP_")
 )
 
