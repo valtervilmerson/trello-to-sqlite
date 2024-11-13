@@ -44,11 +44,12 @@ def main(db_conn):
     db_conn.insert_board_state(execution_id)
 
     db_conn.insert_done_list()
+    db_conn.update_execution_history(execution_id)
 
     print('Main Completed at ', datetime.now())
 
 
-def remove_cards_labels(trello, db_conn, board_id,bypass=False):
+def remove_cards_labels(trello, db_conn, board_id, bypass=False):
     # TODO create a condition to check if the routine has already been executed on mondays
     if datetime.today().isoweekday() == 1 or bypass:
         utilities.remove_cards_labels(trello, db_conn, board_id)

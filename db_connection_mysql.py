@@ -753,5 +753,20 @@ class MySQLConnection:
         print("{} actions were inserted".format(len(inserted_rows)))
         return inserted_rows
 
+    def update_execution_history(self, execution_id):
+        print('update_execution_history started at:', datetime.now())
+
+        update_cursor = self.connection.cursor()
+
+        query = 'UPDATE EXECUTION_HISTORY SET EH_FINISHED_AT = %s WHERE EH_IDENTITY = %s'
+        update_data = (datetime.now(), execution_id)
+
+        try:
+            update_cursor.execute(query, update_data)
+        except Error as e:
+            print(e)
+            return e
+        self.connection.commit()
+
     def close(self):
         self.connection.close()
