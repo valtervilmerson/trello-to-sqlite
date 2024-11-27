@@ -12,6 +12,7 @@ class MySQLConnection:
         self.trello_connection = trello_conn
         self.config = config
         self.environment = config.environment.ENV
+        self.execution_id = None
         try:
             if self.environment == 'production':
                 self.connection = mysql.connect(user=config.database.MYSQL_USER, passwd=config.database.MYSQL_PASSWORD,
@@ -28,7 +29,9 @@ class MySQLConnection:
             return 0
 
     def get_db_cards_labels(self):
-        print('get_db_cards_labels started at:', datetime.now())
+        message = 'get_db_cards_labels started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT CL_CARD_ID, CL_LABEL_ID FROM CARDS_LABELS " \
                 "WHERE CL_BOARD_ID = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
@@ -41,7 +44,9 @@ class MySQLConnection:
             return 0
 
     def get_db_lists(self):
-        print('get_db_lists started at:', datetime.now())
+        message = 'get_db_lists started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = 'SELECT LIST_ID FROM LISTS WHERE ' \
                 "LIST_ID_BOARD = '" + self.trello_connection.board + "' ORDER BY LIST_POS DESC"
         cursor = self.connection.cursor()
@@ -54,7 +59,9 @@ class MySQLConnection:
             return 0
 
     def get_db_labels_ids(self):
-        print('get_db_labels_ids started at:', datetime.now())
+        message = 'get_db_labels_ids started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT LABEL_ID FROM LABELS WHERE LABEL_ID_BOARD = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
@@ -66,7 +73,9 @@ class MySQLConnection:
             return 0
 
     def get_db_cards_ids(self):
-        print('get_db_cards_ids started at:', datetime.now())
+        message = 'get_db_cards_ids started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT CARD_ID FROM CARDS WHERE CARD_ID_BOARD ='" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
@@ -78,7 +87,9 @@ class MySQLConnection:
             return 0
 
     def get_db_board_actions_ids(self):
-        print('get_db_board_actions_ids started at:', datetime.now())
+        message = 'get_db_board_actions_ids started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT ACTION_ID FROM ACTIONS WHERE ACTION_BOARD_ID = '" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
         try:
@@ -90,7 +101,9 @@ class MySQLConnection:
             return 0
 
     def get_cfd_priority_list(self):
-        print('get_cfd_priority_list started at:', datetime.now())
+        message = 'get_cfd_priority_list started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT PRIORITY_ID_LIST FROM CFD_PRIORITY_ORDER " \
                 "WHERE PRIORITY_ID_BOARD ='" + self.trello_connection.board + "'"
         cursor = self.connection.cursor()
@@ -104,7 +117,10 @@ class MySQLConnection:
             return 0
 
     def insert_lists(self):
-        print('insert_lists started at:', datetime.now())
+        message = 'insert_lists started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_lists = self.trello_connection.get_trello_lists()
@@ -129,7 +145,9 @@ class MySQLConnection:
         return inserted_rows
 
     def insert_cards(self):
-        print('insert_cards started at:', datetime.now())
+        message = 'insert_cards started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_cards = self.trello_connection.get_all_cards()
@@ -160,7 +178,9 @@ class MySQLConnection:
         return inserted_rows
 
     def insert_actions(self):
-        print('insert_actions started at:', datetime.now())
+        message = 'insert_actions started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_actions = self.trello_connection.get_trello_board_actions()
@@ -189,7 +209,9 @@ class MySQLConnection:
         return inserted_rows
 
     def insert_cfd(self):
-        print('insert_cfd started at:', datetime.now())
+        message = 'insert_cfd started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
         query = 'INSERT INTO CFD (CFD_BOARD_ID, CFD_LIST_ID, CFD_TOTAL_CARDS, CFD_PROCESSING_DATE) ' \
                 'SELECT LIST_ID_BOARD AS CFD_BOARD_ID ' \
@@ -215,7 +237,9 @@ class MySQLConnection:
             return e
 
     def insert_cfd_priority_order(self):
-        print('insert_cfd_priority_order started at:', datetime.now())
+        message = 'insert_cfd_priority_order started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
         query = 'INSERT INTO CFD_PRIORITY_ORDER (PRIORITY_ID_BOARD,PRIORITY_ID_LIST, PRIORITY_ORDER) ' \
                 'SELECT LIST_ID_BOARD' \
@@ -239,7 +263,9 @@ class MySQLConnection:
             return e
 
     def delete_cfd_priority_order(self):
-        print('delete_cfd_priority_order started at:', datetime.now())
+        message = 'delete_cfd_priority_order started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_lists = self.trello_connection.get_trello_lists()
         cfd_lists = self.get_cfd_priority_list()
 
@@ -258,7 +284,9 @@ class MySQLConnection:
                 return 0
 
     def insert_labels(self):
-        print('insert_labels started at:', datetime.now())
+        message = 'insert_labels started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_labels = self.trello_connection.get_trello_labels()
@@ -283,7 +311,9 @@ class MySQLConnection:
         return inserted_rows
 
     def insert_cards_labels(self, execution_id):
-        print('insert_cards_labels started at:', datetime.now())
+        message = 'insert_cards_labels started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
         labels = []
 
@@ -314,7 +344,9 @@ class MySQLConnection:
         return inserted_rows
 
     def insert_cards_members(self, execution_id):
-        print('insert_cards_members started at:', datetime.now())
+        message = 'insert_cards_members started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
         members = []
 
@@ -344,7 +376,9 @@ class MySQLConnection:
         return inserted_rows
 
     def update_labels(self):
-        print('update_labels started at:', datetime.now())
+        message = 'update_labels started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_labels = self.trello_connection.get_trello_labels()
 
         update_cursor = self.connection.cursor()
@@ -361,7 +395,9 @@ class MySQLConnection:
         self.connection.commit()
 
     def update_lists(self):
-        print('update_lists started at:', datetime.now())
+        message = 'update_lists started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_lists_update = self.trello_connection.get_trello_lists()
 
         update_cursor = self.connection.cursor()
@@ -378,7 +414,9 @@ class MySQLConnection:
                 return e
 
     def update_cards(self):
-        print('update_cards started at:', datetime.now())
+        message = 'update_cards started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_cards_update = self.trello_connection.get_all_cards()
 
         update_cursor = self.connection.cursor()
@@ -418,7 +456,9 @@ class MySQLConnection:
                 return e
 
     def cfd_priority_definition(self):
-        print('cfd_priority_definition started at:', datetime.now())
+        message = 'cfd_priority_definition started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = 'UPDATE CFD_PRIORITY_ORDER ' \
                 'JOIN LISTS ON LIST_ID = PRIORITY_ID_LIST ' \
                 'SET PRIORITY_ORDER = %s, PRIORITY_LIST_NAME = CONCAT(%s, " - " , LIST_NAME) ' \
@@ -437,7 +477,8 @@ class MySQLConnection:
             counter = counter + 1
 
     def close_labels(self):
-        print('close_labels started at:', datetime.now())
+        message = 'close_labels started at: ' + str(datetime.now())
+        print(message)
         db_labels_ids = self.get_db_labels_ids()
         trello_labels = self.trello_connection.get_trello_labels()
 
@@ -457,7 +498,9 @@ class MySQLConnection:
                 return e
 
     def close_lists(self):
-        print('close_lists started at:', datetime.now())
+        message = 'close_lists started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_lists = self.trello_connection.get_trello_lists()
         db_lists = self.get_db_lists()
 
@@ -477,7 +520,9 @@ class MySQLConnection:
                 return 0
 
     def close_cards(self):
-        print('close_cards started at:', datetime.now())
+        message = 'close_cards started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_cards = self.trello_connection.get_trello_cards()
         db_cards = self.get_db_cards_ids()
 
@@ -497,7 +542,9 @@ class MySQLConnection:
                 return 0
 
     def get_board_done_list(self):
-        print('get_board_done_list started at:', datetime.now())
+        message = 'get_board_done_list started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneList' " \
                 "AND RULES_ID_BOARD = '" + self.trello_connection.board + "' LIMIT 1"
         cursor = self.connection.cursor()
@@ -511,7 +558,9 @@ class MySQLConnection:
             return 0
 
     def insert_board_state(self, execution_id):
-        print('insert_board_state started at:', datetime.now())
+        message = 'insert_board_state started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_cards = self.trello_connection.get_trello_cards()
         trello_lists = self.trello_connection.get_trello_lists()
         done_list = self.get_board_done_list()
@@ -545,7 +594,9 @@ class MySQLConnection:
                 return 0
 
     def get_done_list(self, done_list):
-        print('get_done_list started at:', datetime.now())
+        message = 'get_done_list started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         cursor = self.connection.cursor()
         query = "SELECT DL_BOARD_ID, DL_LIST_ID, DL_CARD_ID ,DL_LABEL_ID FROM DONE_LIST WHERE " \
                 "DL_BOARD_ID = '" + self.trello_connection.board + "' AND DL_LIST_ID = '" + done_list + "'"
@@ -557,45 +608,55 @@ class MySQLConnection:
             return 0
 
     def insert_done_list(self):
-        print('insert_done_list started at:', datetime.now())
+        message = 'insert_done_list started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         trello_cards = self.trello_connection.get_trello_cards()
         done_list = self.get_board_done_list()
-        done_list = done_list[0]
-        cards_on_done_list = [x for x in trello_cards if x['idList'] in done_list]
-        cards_already_done = self.get_done_list(done_list)
-        cards_already_done = [x[2] for x in cards_already_done]
-        new_cards = [x for x in cards_on_done_list if x['id'] not in cards_already_done]
-        cursor = self.connection.cursor()
-        for card in new_cards:
-            for label in card['idLabels']:
-                done_list_data = (card['idBoard'], card['idList'], card['id'], label, self.execution_time,
-                                  self.execution_time)
+        if len(done_list) > 0:
+            done_list = done_list[0][0]
+            cards_on_done_list = [x for x in trello_cards if x['idList'] == done_list]
+            cards_already_done = self.get_done_list(done_list)
+            cards_already_done = [x[2] for x in cards_already_done]
+            new_cards = [x for x in cards_on_done_list if x['id'] not in cards_already_done]
+            cursor = self.connection.cursor()
+            for card in new_cards:
+                for label in card['idLabels']:
+                    done_list_data = (card['idBoard'], card['idList'], card['id'], label, self.execution_time,
+                                      self.execution_time)
 
-                query = 'INSERT INTO DONE_LIST (DL_BOARD_ID, DL_LIST_ID, DL_CARD_ID, DL_LABEL_ID,DL_INSERTED_AT, ' \
-                        'DL_UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s)'
+                    query = 'INSERT INTO DONE_LIST (DL_BOARD_ID, DL_LIST_ID, DL_CARD_ID, DL_LABEL_ID,DL_INSERTED_AT, ' \
+                            'DL_UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s)'
 
-                try:
-                    cursor.execute(query, done_list_data)
-                    self.connection.commit()
-                except Error as e:
-                    print(e)
-                    return 0
+                    try:
+                        cursor.execute(query, done_list_data)
+                        self.connection.commit()
+                    except Error as e:
+                        print(e)
+                        return 0
 
     def insert_execution_history(self):
-        print('execution_history started at:', datetime.now())
+        message = 'insert_execution_history started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
+
         cursor = self.connection.cursor()
 
         query = 'INSERT INTO EXECUTION_HISTORY (EH_DESCRIPTION, EH_CREATE_DATE, EH_ID_BOARD) VALUES (%s, %s, %s)'
         try:
             cursor.execute(query, ('DONE', self.execution_time, self.trello_connection.board))
             self.connection.commit()
+            self.execution_id = cursor.lastrowid
+            self.insert_execution_log(message)
             return cursor.lastrowid
         except Error as e:
             print(e)
             return 0
 
     def get_card_create_date(self, card):
-        print('get_card_create_date started at:', datetime.now())
+        message = 'get_card_create_date started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         date = ''
         action = self.trello_connection.get_cards_actions(card['id'], 'createCard')
         if not action:
@@ -617,7 +678,9 @@ class MySQLConnection:
             return None
 
     def get_db_card_without_date(self):
-        print('get_db_card_without_date started at:', datetime.now())
+        message = 'get_db_card_without_date started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         cursor = self.connection.cursor()
         query = "SELECT CARD_ID FROM CARDS WHERE CARD_CREATION_DATE IS NULL " \
                 "AND CARD_ID_BOARD = '" + self.trello_connection.board + "'"
@@ -629,7 +692,9 @@ class MySQLConnection:
             return 0
 
     def get_db_members(self):
-        print('get_db_members started at:', datetime.now())
+        message = 'get_db_members started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         query = 'SELECT MEMBER_ID FROM MEMBER WHERE MEMBER_BOARD_ID = "' + self.trello_connection.board + '"'
         cursor = self.connection.cursor()
         try:
@@ -641,7 +706,9 @@ class MySQLConnection:
             return 0
 
     def insert_db_members(self):
-        print('insert_db_members started at:', datetime.now())
+        message = 'insert_db_members started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_members = self.trello_connection.get_members_from_board()
@@ -667,7 +734,9 @@ class MySQLConnection:
             return inserted_rows
 
     def insert_all_actions(self, actions):
-        print('insert_all_actions started at:', datetime.now())
+        message = 'insert_all_actions started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
         inserted_rows = []
 
         trello_actions = actions
@@ -703,7 +772,10 @@ class MySQLConnection:
         return inserted_rows
 
     def get_active_boards(self):
-        print('get_active_boards started at:', datetime.now())
+        message = 'get_active_boards started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
+
         query = 'SELECT BOARD_ID FROM BOARDS WHERE BOARD_ACTIVE = 1'
         cursor = self.connection.cursor()
         try:
@@ -715,7 +787,9 @@ class MySQLConnection:
             return 0
 
     def get_exclusive_actions(self, actions):
-        print('get_exclusive_actions started at:', datetime.now())
+        message = 'get_exclusive_actions started at:', datetime.now()
+        print(message)
+        self.insert_execution_log(message)
 
         trello_actions = actions
 
@@ -726,9 +800,13 @@ class MySQLConnection:
         return exclusive_actions
 
     def insert_exclusive_actions(self, exclusive_actions):
-        print('insert_exclusive_actions started at:', datetime.now())
+        message = 'insert_exclusive_actions started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
+
         inserted_rows = []
         cursor = self.connection.cursor()
+
         for data in exclusive_actions:
             insert_data = (data['id'], data['idMemberCreator'], data['cardId'], data['boardId'], data['listBefore'],
                            data['listAfter'], data['type'],
@@ -754,7 +832,9 @@ class MySQLConnection:
         return inserted_rows
 
     def update_execution_history(self, execution_id):
-        print('update_execution_history started at:', datetime.now())
+        message = 'update_execution_history started at: ' + str(datetime.now())
+        print(message)
+        self.insert_execution_log(message)
 
         update_cursor = self.connection.cursor()
 
@@ -763,6 +843,22 @@ class MySQLConnection:
 
         try:
             update_cursor.execute(query, update_data)
+        except Error as e:
+            print(e)
+            return e
+        self.connection.commit()
+
+    def insert_execution_log(self, process_message):
+        # message = 'insert_execution_log started at: ' + str(datetime.now())
+        # print(message)
+
+        insert_cursor = self.connection.cursor()
+
+        query = 'INSERT INTO EXECUTION_LOG (EL_EXECUTION_ID, EL_MESSAGE) VALUES (%s, %s)'
+        insert_data = (self.execution_id, process_message)
+
+        try:
+            insert_cursor.execute(query, insert_data)
         except Error as e:
             print(e)
             return e

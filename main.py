@@ -5,6 +5,7 @@ from db_connection_mysql import MySQLConnection
 from configuration.common import ConfigurationBuilder
 from configuration.toml import TOMLFile
 from configuration.env import EnvVars
+import time
 
 builder = ConfigurationBuilder(
     TOMLFile("C:/trello-techsallus/settings.toml"),
@@ -17,34 +18,36 @@ config = builder.build()
 def main(db_conn):
     print('Main Started at ', datetime.now())
 
-    execution_id = db_conn.insert_execution_history()
-
-    db_conn.insert_lists()
-    db_conn.update_lists()
-    db_conn.close_lists()
-
-    db_conn.insert_cards()
-    db_conn.update_cards()
-    db_conn.close_cards()
-
-    # TODO fix collation for dev database
-    db_conn.insert_cfd()
-    db_conn.insert_cfd_priority_order()
-    db_conn.delete_cfd_priority_order()
-    db_conn.cfd_priority_definition()
-
-    db_conn.insert_labels()
-    db_conn.update_labels()
-    db_conn.close_labels()
-
-    db_conn.insert_db_members()
-
-    db_conn.insert_cards_labels(execution_id)
-    db_conn.insert_cards_members(execution_id)
-    db_conn.insert_board_state(execution_id)
+    # execution_id = db_conn.insert_execution_history()
+    # db_conn.execution_id = execution_id
+    #
+    # db_conn.insert_lists()
+    # db_conn.update_lists()
+    # db_conn.close_lists()
+    #
+    # db_conn.insert_cards()
+    # # db_conn.update_cards()
+    # db_conn.close_cards()
+    #
+    # # TODO fix collation for dev database
+    # db_conn.insert_cfd()
+    # db_conn.insert_cfd_priority_order()
+    # db_conn.delete_cfd_priority_order()
+    # db_conn.cfd_priority_definition()
+    #
+    # db_conn.insert_labels()
+    # db_conn.update_labels()
+    # db_conn.close_labels()
+    #
+    # db_conn.insert_db_members()
+    #
+    # db_conn.insert_cards_labels(execution_id)
+    # db_conn.insert_cards_members(execution_id)
+    # db_conn.insert_board_state(execution_id)
 
     db_conn.insert_done_list()
-    db_conn.update_execution_history(execution_id)
+
+    # db_conn.update_execution_history(execution_id)
 
     print('Main Completed at ', datetime.now())
 
@@ -54,13 +57,16 @@ def remove_cards_labels(trello, db_conn, board_id, bypass=False):
     if datetime.today().isoweekday() == 1 or bypass:
         utilities.remove_cards_labels(trello, db_conn, board_id)
     else:
-        print('Remove_cards_labels é executado apenas nas segundas-feiras')
+        message = 'Remove_cards_labels é executado apenas nas segundas-feiras ' + str(datetime.now())
+        db_conn.insert_execution_log(message)
 
 
 def insert_all_board_actions(trello_conn, db_conn):
-    print('insert_all_board_actions Started at', datetime.now())
+    message = 'insert_all_board_actions Started at ' + str(datetime.now())
+    print(message)
     bypass = False
     if datetime.today().isoweekday() == 1 or bypass:
+        db_conn.insert_execution_log(message)
         all_actions = trello_conn.get_all_board_actions_formatted()
         all_actions_ids = [actionId['id'] for actionId in all_actions]
         exclusive_actions = db_conn.get_exclusive_actions(all_actions_ids)
@@ -68,7 +74,9 @@ def insert_all_board_actions(trello_conn, db_conn):
             exclusive = [x for x in all_actions if x['id'] in exclusive_actions]
             db_conn.insert_exclusive_actions(exclusive)
     else:
-        print('insert_all_board_actions é executado apenas nas segundas-feiras')
+        message = 'insert_all_board_actions é executado apenas nas segundas-feiras ' + str(datetime.now())
+        print(message)
+        db_conn.insert_execution_log(message)
     print('insert_all_board_actions done at', datetime.now())
 
 
@@ -90,6 +98,6 @@ if __name__ == '__main__':
         for board in active_boards:
             trello_connection.set_board(board)
             main(mysql)
-            insert_all_board_actions(trello_connection, mysql)
-            remove_cards_labels(trello_connection, mysql, board)
+            # insert_all_board_actions(trello_connection, mysql)
+            # remove_cards_labels(trello_connection, mysql, board)
     mysql.close()
