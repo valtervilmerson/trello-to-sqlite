@@ -18,36 +18,36 @@ config = builder.build()
 def main(db_conn):
     print('Main Started at ', datetime.now())
 
-    # execution_id = db_conn.insert_execution_history()
-    # db_conn.execution_id = execution_id
-    #
-    # db_conn.insert_lists()
-    # db_conn.update_lists()
-    # db_conn.close_lists()
-    #
-    # db_conn.insert_cards()
-    # # db_conn.update_cards()
-    # db_conn.close_cards()
-    #
-    # # TODO fix collation for dev database
-    # db_conn.insert_cfd()
-    # db_conn.insert_cfd_priority_order()
-    # db_conn.delete_cfd_priority_order()
-    # db_conn.cfd_priority_definition()
-    #
-    # db_conn.insert_labels()
-    # db_conn.update_labels()
-    # db_conn.close_labels()
-    #
-    # db_conn.insert_db_members()
-    #
-    # db_conn.insert_cards_labels(execution_id)
-    # db_conn.insert_cards_members(execution_id)
-    # db_conn.insert_board_state(execution_id)
+    execution_id = db_conn.insert_execution_history()
+    db_conn.execution_id = execution_id
+
+    db_conn.insert_lists()
+    db_conn.update_lists()
+    db_conn.close_lists()
+
+    db_conn.insert_cards()
+    # db_conn.update_cards()
+    db_conn.close_cards()
+
+    # TODO fix collation for dev database
+    db_conn.insert_cfd()
+    db_conn.insert_cfd_priority_order()
+    db_conn.delete_cfd_priority_order()
+    db_conn.cfd_priority_definition()
+
+    db_conn.insert_labels()
+    db_conn.update_labels()
+    db_conn.close_labels()
+
+    db_conn.insert_db_members()
+
+    db_conn.insert_cards_labels(execution_id)
+    db_conn.insert_cards_members(execution_id)
+    db_conn.insert_board_state(execution_id)
 
     db_conn.insert_done_list()
 
-    # db_conn.update_execution_history(execution_id)
+    db_conn.update_execution_history(execution_id)
 
     print('Main Completed at ', datetime.now())
 
@@ -98,6 +98,6 @@ if __name__ == '__main__':
         for board in active_boards:
             trello_connection.set_board(board)
             main(mysql)
-            # insert_all_board_actions(trello_connection, mysql)
-            # remove_cards_labels(trello_connection, mysql, board)
+            insert_all_board_actions(trello_connection, mysql)
+            remove_cards_labels(trello_connection, mysql, board)
     mysql.close()
