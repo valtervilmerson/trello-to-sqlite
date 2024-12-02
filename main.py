@@ -100,4 +100,5 @@ if __name__ == '__main__':
             main(mysql)
             insert_all_board_actions(trello_connection, mysql)
             remove_cards_labels(trello_connection, mysql, board)
+            mysql.insert_execution_log('Process finished at: ' + str(datetime.now()))
     mysql.close()

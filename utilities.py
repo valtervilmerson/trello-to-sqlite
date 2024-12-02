@@ -39,33 +39,30 @@ def remove_cards_labels(trello_connection, db_conn, board_id):
     print(message)
     db_conn.insert_execution_log(message)
 
-    # list_id_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneList' AND" \
-    #         " RULES_ID_BOARD = '" + board_id + "'"
-    #
-    # label_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneLabel' AND" \
-    #         " RULES_ID_BOARD = '" + board_id + "'"
-    #
-    # cursor = db_conn.connection.cursor()
-    # try:
-    #     cursor.execute(list_id_query)
-    #     list_id = cursor.fetchall()
-    #     cursor.execute(label_query)
-    #     label_id = cursor.fetchall()
-    #     list_id = list_id[0][0]
-    #     if len(list_id) > 0:
-    #         cards = trello_connection.get_cards_from_list(list_id)
-    #         if len(cards) > 0 and len(label_id) > 0:
-    #             label_id = label_id[0][0]
-    #             for card in cards:
-    #                 if label_id in card['idLabels']:
-    #                     trello_connection.delete_card_label(label_id, card['id'])
-    #
-    # except Error as e:
-    #     print(e)
-    #     return 0
+    list_id_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneList' AND" \
+            " RULES_ID_BOARD = '" + board_id + "'"
 
+    label_query = "SELECT RULES_TRELLO_OBJECT_ID FROM RULES WHERE RULES_KEY = 'doneLabel' AND" \
+            " RULES_ID_BOARD = '" + board_id + "'"
 
+    cursor = db_conn.connection.cursor()
+    try:
+        cursor.execute(list_id_query)
+        list_id = cursor.fetchall()
+        cursor.execute(label_query)
+        label_id = cursor.fetchall()
+        list_id = list_id[0][0]
+        if len(list_id) > 0:
+            cards = trello_connection.get_cards_from_list(list_id)
+            if len(cards) > 0 and len(label_id) > 0:
+                label_id = label_id[0][0]
+                for card in cards:
+                    if label_id in card['idLabels']:
+                        trello_connection.delete_card_label(label_id, card['id'])
 
+    except Error as e:
+        print(e)
+        return 0
 
     print('Remove_labels completed at ', datetime.now())
 
